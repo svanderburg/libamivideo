@@ -76,11 +76,11 @@ AMI_UByte *amiVideo_bitplanesToChunky(const AMI_UByte *bitplanes, const unsigned
     return result;
 }
 
-AMI_OutputColor *amiVideo_bitplanesToRGB(const AMI_UByte *bitplanes, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth, const AMI_Color *color, const unsigned int colorLength, const AMI_Long viewportMode)
+AMI_OutputColor *amiVideo_bitplanesToRGB(const AMI_UByte *bitplanes, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth, const AMI_Color *color, const unsigned int colorLength, const unsigned int numOfColorBits, const AMI_Long viewportMode)
 {
     AMI_UByte *bytes = amiVideo_bitplanesToChunky(bitplanes, screenWidth, screenHeight, bitplaneDepth);
     unsigned int paletteSize;
-    AMI_OutputColor *palette = amiVideo_computePalette(color, colorLength, viewportMode, &paletteSize);
+    AMI_OutputColor *palette = amiVideo_computePalette(color, colorLength, numOfColorBits, viewportMode, &paletteSize);
     AMI_OutputColor *result = (AMI_OutputColor*)malloc(screenWidth * screenHeight * sizeof(AMI_OutputColor));
     unsigned int i;
     

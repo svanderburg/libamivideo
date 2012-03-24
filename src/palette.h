@@ -67,10 +67,11 @@ AMI_OutputColor;
  *
  * @param color An array of colors representing the original Amiga palette
  * @param colorLength Length of the color array
+ * @param numOfColorBits The amount of bits each color components has (OCS/ECS chipsets have 4, AGA has 8)
  * @param viewportMode Amiga viewport value
  * @param resultColorLength The length of the resulting color array
  * @return An array of coverted 32-bit colors
  */
-AMI_OutputColor *amiVideo_computePalette(const AMI_Color *color, const unsigned int colorLength, const AMI_Long viewportMode, unsigned int *resultColorLength);
+AMI_OutputColor *amiVideo_computePalette(const AMI_Color *color, const unsigned int colorLength, const unsigned int numOfColorBits, const AMI_Long viewportMode, unsigned int *resultColorLength);
 
 #endif

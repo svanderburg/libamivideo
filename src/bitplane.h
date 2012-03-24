@@ -49,9 +49,10 @@ AMI_UByte *amiVideo_bitplanesToChunky(const AMI_UByte *bitplanes, const unsigned
  * @param bitplaneDepth Number of bits used for the color palette
  * @param color An array of colors representing the original Amiga palette
  * @param colorLength Length of the color array
+ * @param numOfColorBits The amount of bits each color components has (OCS/ECS chipsets have 4, AGA has 8)
  * @param viewportMode Amiga viewport register value
  * @return An array of bytes representing pixel index values
  */
-AMI_OutputColor *amiVideo_bitplanesToRGB(const AMI_UByte *bitplanes, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth, const AMI_Color *color, const unsigned int colorLength, const AMI_Long viewportMode);
+AMI_OutputColor *amiVideo_bitplanesToRGB(const AMI_UByte *bitplanes, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth, const AMI_Color *color, const unsigned int colorLength, const unsigned int numOfColorBits, const AMI_Long viewportMode);
 
 #endif
