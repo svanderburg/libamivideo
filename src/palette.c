@@ -58,9 +58,9 @@ AMI_OutputColor *amiVideo_computePalette(const AMI_Color *color, const unsigned 
     {
 	for(i = 0; i < colorLength; i++)
 	{
-	    result[i + colorLength].r = color[i].r >> 1;
-	    result[i + colorLength].g = color[i].g >> 1;
-	    result[i + colorLength].b = color[i].b >> 1;
+	    result[i + colorLength].r = (color[i].r >> 1) << shiftAmount;
+	    result[i + colorLength].g = (color[i].g >> 1) << shiftAmount;
+	    result[i + colorLength].b = (color[i].b >> 1) << shiftAmount;
 	}
     }
     
