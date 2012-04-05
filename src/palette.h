@@ -30,15 +30,15 @@
 typedef struct
 {
     /** Defines the intensity of the red color channel */
-    AMI_UByte r;
+    amiVideo_UByte r;
     
     /** Defines the intensity of the green color channel */
-    AMI_UByte g;
+    amiVideo_UByte g;
     
     /** Defines the intensity of the blue color channel */
-    AMI_UByte b;
+    amiVideo_UByte b;
 }
-AMI_Color;
+amiVideo_Color;
 
 /**
  * @brief Struct storing values of a color channel.
@@ -47,18 +47,18 @@ AMI_Color;
 typedef struct
 {
     /** Defines the intensity of the red color channel */
-    AMI_UByte r;
+    amiVideo_UByte r;
     
     /** Defines the intensity of the green color channel */
-    AMI_UByte g;
+    amiVideo_UByte g;
     
     /** Defines the intensity of the blue color channel */
-    AMI_UByte b;
+    amiVideo_UByte b;
 
     /** Used for alignment with SDL_Color */
-    AMI_UByte unused; 
+    amiVideo_UByte unused; 
 }
-AMI_OutputColor;
+amiVideo_OutputColor;
 
 /**
  * Coverts the given color palette into a 32-bit color palette. Additionally,
@@ -72,6 +72,6 @@ AMI_OutputColor;
  * @param resultColorLength The length of the resulting color array
  * @return An array of coverted 32-bit colors
  */
-AMI_OutputColor *amiVideo_computePalette(const AMI_Color *color, const unsigned int colorLength, const unsigned int numOfColorBits, const AMI_Long viewportMode, unsigned int *resultColorLength);
+amiVideo_OutputColor *amiVideo_computePalette(const amiVideo_Color *color, const unsigned int colorLength, const unsigned int numOfColorBits, const amiVideo_Long viewportMode, unsigned int *resultColorLength);
 
 #endif

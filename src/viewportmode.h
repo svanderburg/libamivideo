@@ -23,8 +23,8 @@
 #define __AMIVIDEO_VIEWPORTMODE_H
 #include "amivideotypes.h"
 
-#define AMI_VIDEOPORTMODE_EHB 0x80
-#define AMI_VIDEOPORTMODE_HAM 0x800
+#define AMIVIDEO_VIDEOPORTMODE_EHB 0x80
+#define AMIVIDEO_VIDEOPORTMODE_HAM 0x800
 
 /**
  * Checks whether the Extra-Halfbrite (EHB) bit is enabled in the viewport mode register.
@@ -32,7 +32,7 @@
  * @param viewportMode Amiga viewport register value
  * @return TRUE if Extra-Halfbrite is enabled, else FALSE
  */
-int amiVideo_checkExtraHalfbrite(const AMI_Long viewportMode);
+int amiVideo_checkExtraHalfbrite(const amiVideo_Long viewportMode);
 
 /**
  * Checks whether the Hold-and-Modify (HAM) bit is enabled in the viewport mode register.
@@ -40,6 +40,6 @@ int amiVideo_checkExtraHalfbrite(const AMI_Long viewportMode);
  * @param viewportMode Amiga viewport register value
  * @return TRUE if Extra-Halfbrite is enabled, else FALSE
  */
-int amiVideo_checkHoldAndModify(const AMI_Long viewportMode);
+int amiVideo_checkHoldAndModify(const amiVideo_Long viewportMode);
 
 #endif

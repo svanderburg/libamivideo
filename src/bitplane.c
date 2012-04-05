@@ -26,10 +26,10 @@
 #define TRUE 1
 #define FALSE 0
 
-AMI_UByte *amiVideo_bitplanesToChunky(const AMI_UByte *bitplanes, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth)
+amiVideo_UByte *amiVideo_bitplanesToChunky(const amiVideo_UByte *bitplanes, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth)
 {
     unsigned int i;
-    unsigned char *result = (AMI_UByte*)calloc(screenWidth * screenHeight, sizeof(AMI_UByte)); /* Empty with 0 bytes */
+    unsigned char *result = (amiVideo_UByte*)calloc(screenWidth * screenHeight, sizeof(amiVideo_UByte)); /* Empty with 0 bytes */
     unsigned int offset = 0;
     unsigned int bitplaneSize = screenWidth * screenHeight / 8;
     
@@ -37,11 +37,11 @@ AMI_UByte *amiVideo_bitplanesToChunky(const AMI_UByte *bitplanes, const unsigned
     {
 	unsigned int j;
 	unsigned int count = 0;
-	AMI_UByte value = 1 << i;
+	amiVideo_UByte value = 1 << i;
 	
 	for(j = 0; j < bitplaneSize; j++)
 	{
-	    AMI_UByte bitplane = bitplanes[offset + j];
+	    amiVideo_UByte bitplane = bitplanes[offset + j];
 	    
 	    if(bitplane & 0x80)
 		result[count] |= value;
@@ -76,12 +76,12 @@ AMI_UByte *amiVideo_bitplanesToChunky(const AMI_UByte *bitplanes, const unsigned
     return result;
 }
 
-AMI_OutputColor *amiVideo_bitplanesToRGB(const AMI_UByte *bitplanes, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth, const AMI_Color *color, const unsigned int colorLength, const unsigned int numOfColorBits, const AMI_Long viewportMode)
+amiVideo_OutputColor *amiVideo_bitplanesToRGB(const amiVideo_UByte *bitplanes, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth, const amiVideo_Color *color, const unsigned int colorLength, const unsigned int numOfColorBits, const amiVideo_Long viewportMode)
 {
-    AMI_UByte *bytes = amiVideo_bitplanesToChunky(bitplanes, screenWidth, screenHeight, bitplaneDepth);
+    amiVideo_UByte *bytes = amiVideo_bitplanesToChunky(bitplanes, screenWidth, screenHeight, bitplaneDepth);
     unsigned int paletteSize;
-    AMI_OutputColor *palette = amiVideo_computePalette(color, colorLength, numOfColorBits, viewportMode, &paletteSize);
-    AMI_OutputColor *result = (AMI_OutputColor*)malloc(screenWidth * screenHeight * sizeof(AMI_OutputColor));
+    amiVideo_OutputColor *palette = amiVideo_computePalette(color, colorLength, numOfColorBits, viewportMode, &paletteSize);
+    amiVideo_OutputColor *result = (amiVideo_OutputColor*)malloc(screenWidth * screenHeight * sizeof(amiVideo_OutputColor));
     unsigned int i;
     
     if(amiVideo_checkHoldAndModify(viewportMode))
@@ -93,13 +93,13 @@ AMI_OutputColor *amiVideo_bitplanesToRGB(const AMI_UByte *bitplanes, const unsig
 	for(i = 0; i < screenHeight; i++)
 	{
 	    unsigned int j;
-	    AMI_OutputColor previousResult = palette[0];
+	    amiVideo_OutputColor previousResult = palette[0];
 	    
 	    for(j = 0; j < screenWidth; j++)
 	    {
-		AMI_UByte byte = bytes[offset + j];
-		AMI_UByte mode = (byte & (0x3 << (bitplaneDepth - 2))) >> (bitplaneDepth - 2);
-		AMI_UByte index = byte & ~(0x3 << (bitplaneDepth - 2));
+		amiVideo_UByte byte = bytes[offset + j];
+		amiVideo_UByte mode = (byte & (0x3 << (bitplaneDepth - 2))) >> (bitplaneDepth - 2);
+		amiVideo_UByte index = byte & ~(0x3 << (bitplaneDepth - 2));
 	    
 		if(mode == 0x0) /* Data bits are an index in the color palette */
 		    result[offset + j] = palette[index];

@@ -23,10 +23,10 @@
 #include <stdlib.h>
 #include "viewportmode.h"
 
-AMI_OutputColor *amiVideo_computePalette(const AMI_Color *color, const unsigned int colorLength, const unsigned int numOfColorBits, const AMI_Long viewportMode, unsigned int *resultColorLength)
+amiVideo_OutputColor *amiVideo_computePalette(const amiVideo_Color *color, const unsigned int colorLength, const unsigned int numOfColorBits, const amiVideo_Long viewportMode, unsigned int *resultColorLength)
 {
     int halfbrite;
-    AMI_OutputColor *result;
+    amiVideo_OutputColor *result;
     unsigned int i;
     int shiftAmount;
     
@@ -40,7 +40,7 @@ AMI_OutputColor *amiVideo_computePalette(const AMI_Color *color, const unsigned 
 	*resultColorLength = colorLength;
 
     /* Allocate memory for the color palette */
-    result = (AMI_OutputColor*)malloc(*resultColorLength * sizeof(AMI_OutputColor));
+    result = (amiVideo_OutputColor*)malloc(*resultColorLength * sizeof(amiVideo_OutputColor));
     
     /* Take the original palette colors and convert the to 8-bit color components */
     

@@ -21,12 +21,12 @@
 
 #include "viewportmode.h"
 
-int amiVideo_checkExtraHalfbrite(const AMI_Long viewportMode)
+int amiVideo_checkExtraHalfbrite(const amiVideo_Long viewportMode)
 {
-    return (viewportMode & AMI_VIDEOPORTMODE_EHB);
+    return (viewportMode & AMIVIDEO_VIDEOPORTMODE_EHB);
 }
 
-int amiVideo_checkHoldAndModify(const AMI_Long viewportMode)
+int amiVideo_checkHoldAndModify(const amiVideo_Long viewportMode)
 {
-    return (viewportMode & AMI_VIDEOPORTMODE_HAM);
+    return (viewportMode & AMIVIDEO_VIDEOPORTMODE_HAM);
 }

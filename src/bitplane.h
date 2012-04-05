@@ -37,7 +37,7 @@
  * @param bitplaneDepth Number of bits used for the color palette
  * @return An array of bytes representing pixel index values
  */
-AMI_UByte *amiVideo_bitplanesToChunky(const AMI_UByte *bitplanes, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth);
+amiVideo_UByte *amiVideo_bitplanesToChunky(const amiVideo_UByte *bitplanes, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth);
 
 /**
  * Converts a collection of bitplanes into an array of colors capturing the RGB
@@ -53,6 +53,6 @@ AMI_UByte *amiVideo_bitplanesToChunky(const AMI_UByte *bitplanes, const unsigned
  * @param viewportMode Amiga viewport register value
  * @return An array of bytes representing pixel index values
  */
-AMI_OutputColor *amiVideo_bitplanesToRGB(const AMI_UByte *bitplanes, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth, const AMI_Color *color, const unsigned int colorLength, const unsigned int numOfColorBits, const AMI_Long viewportMode);
+amiVideo_OutputColor *amiVideo_bitplanesToRGB(const amiVideo_UByte *bitplanes, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth, const amiVideo_Color *color, const unsigned int colorLength, const unsigned int numOfColorBits, const amiVideo_Long viewportMode);
 
 #endif

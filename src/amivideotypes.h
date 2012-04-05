@@ -23,9 +23,9 @@
 #define __AMIVIDEOTYPES_H
 
 /** An unsigned byte */
-typedef unsigned char AMI_UByte; 
+typedef unsigned char amiVideo_UByte; 
 
 /** A signed 4-bytes type */
-typedef int AMI_Long;
+typedef int amiVideo_Long;
 
 #endif
