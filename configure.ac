@@ -14,5 +14,6 @@ AC_CONFIG_FILES([
 Makefile
 src/libamivideo.pc
 src/Makefile
+tests/Makefile
 ])
 AC_OUTPUT

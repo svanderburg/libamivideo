@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2012 Sander van der Burg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -26,11 +26,12 @@
 #define TRUE 1
 #define FALSE 0
 
-amiVideo_UByte *amiVideo_bitplanesToChunky(const amiVideo_UByte *bitplanes, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth)
+#define MAX_NUM_OF_BITPLANES 8
+
+amiVideo_UByte *amiVideo_bitplaneMemoryToChunky(amiVideo_UByte **bitplanePointers, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth)
 {
     unsigned int i;
     unsigned char *result = (amiVideo_UByte*)calloc(screenWidth * screenHeight, sizeof(amiVideo_UByte)); /* Empty with 0 bytes */
-    unsigned int offset = 0;
     unsigned int bitplaneSize = screenWidth * screenHeight / 8;
     
     for(i = 0; i < bitplaneDepth; i++)
@@ -38,10 +39,11 @@ amiVideo_UByte *amiVideo_bitplanesToChunky(const amiVideo_UByte *bitplanes, cons
 	unsigned int j;
 	unsigned int count = 0;
 	amiVideo_UByte value = 1 << i;
+	const amiVideo_UByte *bitplanes = bitplanePointers[i];
 	
 	for(j = 0; j < bitplaneSize; j++)
 	{
-	    amiVideo_UByte bitplane = bitplanes[offset + j];
+	    amiVideo_UByte bitplane = bitplanes[j];
 	    
 	    if(bitplane & 0x80)
 		result[count] |= value;
@@ -69,14 +71,31 @@ amiVideo_UByte *amiVideo_bitplanesToChunky(const amiVideo_UByte *bitplanes, cons
 	
 	    count += 8;
 	}
-	
-	offset += bitplaneSize;
     }
     
     return result;
 }
 
-amiVideo_OutputColor *amiVideo_bitplanesToRGB(const amiVideo_UByte *bitplanes, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth, const amiVideo_Color *color, const unsigned int colorLength, const unsigned int numOfColorBits, const amiVideo_Long viewportMode)
+amiVideo_UByte *amiVideo_bitplanesToChunky(amiVideo_UByte *bitplanes, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth)
+{
+    amiVideo_UByte *bitplanePointers[MAX_NUM_OF_BITPLANES];
+    unsigned int i;
+    unsigned int offset = 0;
+    unsigned int bitplaneSize = screenWidth / 8 * screenHeight;
+    
+    /* Set bitplane pointers */
+    
+    for(i = 0; i < bitplaneDepth; i++)
+    {
+	bitplanePointers[i] = bitplanes + offset;
+	offset += bitplaneSize;
+    }
+    
+    /* Convert bitplanes to chunky pixels */
+    return amiVideo_bitplaneMemoryToChunky(bitplanePointers, screenWidth, screenHeight, bitplaneDepth);
+}
+
+amiVideo_OutputColor *amiVideo_bitplanesToRGB(amiVideo_UByte *bitplanes, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth, const amiVideo_Color *color, const unsigned int colorLength, const unsigned int numOfColorBits, const amiVideo_Long viewportMode)
 {
     amiVideo_UByte *bytes = amiVideo_bitplanesToChunky(bitplanes, screenWidth, screenHeight, bitplaneDepth);
     unsigned int paletteSize;
@@ -135,5 +154,57 @@ amiVideo_OutputColor *amiVideo_bitplanesToRGB(const amiVideo_UByte *bitplanes, c
     free(bytes);
     free(palette);
     
+    return result;
+}
+
+void amiVideo_chunkyToBitplaneMemory(amiVideo_UByte **bitplanePointers, const amiVideo_UByte *pixels, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth)
+{
+    unsigned int i;
+    unsigned int bitplaneIndex = 0;
+    int bit = 7;
+    
+    for(i = 0; i < screenWidth * screenHeight; i++)
+    {
+	unsigned int j;
+	amiVideo_UByte bitmask = 1 << bit;
+	
+	for(j = 0; j < bitplaneDepth; j++)
+	{
+	    if(pixels[i] & (1 << j)) /* Check if the current bit of the index value is set */
+		bitplanePointers[j][bitplaneIndex] |= bitmask; /* Modify the current bit in the bitplane byte to be 1 and leave the others untouched */
+	    else
+		bitplanePointers[j][bitplaneIndex] &= ~bitmask; /* Modify the current bit in the bitplane byte to be 0 and leave the others untouched */
+	}
+	
+	bit--;
+	    
+	if(bit < 0)
+	{
+	    bit = 7; /* Reset the bit counter */
+	    bitplaneIndex++; /* Go to the next byte in the bitplane memory */
+	}
+    }
+}
+
+amiVideo_UByte *amiVideo_chunkyToBitplanes(const amiVideo_UByte *pixels, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth)
+{
+    unsigned int bitplaneSize = screenWidth / 8 * screenHeight;
+    amiVideo_UByte *result = (amiVideo_UByte*)malloc(bitplaneSize * bitplaneDepth * sizeof(amiVideo_UByte));
+    amiVideo_UByte *bitplanePointers[MAX_NUM_OF_BITPLANES];
+    unsigned int i;
+    unsigned int offset = 0;
+    
+    /* Set bitplane pointers */
+    
+    for(i = 0; i < bitplaneDepth; i++)
+    {
+	bitplanePointers[i] = result + offset;
+	offset += bitplaneSize;
+    }
+    
+    /* Convert chunky pixels */
+    amiVideo_chunkyToBitplaneMemory(bitplanePointers, pixels, screenWidth, screenHeight, bitplaneDepth);
+    
+    /* Return result */
     return result;
 }
