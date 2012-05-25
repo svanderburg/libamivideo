@@ -28,60 +28,74 @@
 
 #define MAX_NUM_OF_BITPLANES 8
 
-amiVideo_UByte *amiVideo_bitplaneMemoryToChunky(amiVideo_UByte **bitplanePointers, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth)
+static unsigned int calculateScanLineSize(const unsigned int screenWidth)
 {
-    unsigned int i;
-    unsigned char *result = (amiVideo_UByte*)calloc(screenWidth * screenHeight, sizeof(amiVideo_UByte)); /* Empty with 0 bytes */
-    unsigned int bitplaneSize = screenWidth * screenHeight / 8;
+    unsigned int scanLineSizeInWords = screenWidth / 16;
     
-    for(i = 0; i < bitplaneDepth; i++)
+    if(screenWidth % 16 != 0)
+	scanLineSizeInWords++;
+
+    return (scanLineSizeInWords * 2);
+}
+
+amiVideo_UByte *amiVideo_bitplaneMemoryToChunky(amiVideo_UByte **bitplanePointers, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int screenPitch, const unsigned int bitplaneDepth)
+{
+    unsigned char *result = (amiVideo_UByte*)calloc(screenPitch * screenHeight, sizeof(amiVideo_UByte)); /* Fill with 0 bytes */
+    unsigned int scanLineSize = calculateScanLineSize(screenWidth);
+    unsigned int i;
+    
+    for(i = 0; i < bitplaneDepth; i++) /* Iterate over each bitplane */
     {
-	unsigned int j;
 	unsigned int count = 0;
-	amiVideo_UByte value = 1 << i;
-	const amiVideo_UByte *bitplanes = bitplanePointers[i];
+	amiVideo_UByte indexBit = 1 << i;
+	amiVideo_UByte *bitplanes = bitplanePointers[i];
+	unsigned int vOffset = 0;
+	unsigned int j;
 	
-	for(j = 0; j < bitplaneSize; j++)
+	for(j = 0; j < screenHeight; j++) /* Iterate over each scan line */
 	{
-	    amiVideo_UByte bitplane = bitplanes[j];
+	    unsigned int hOffset = vOffset;
+	    unsigned int k;
+	    unsigned int pixelCount = 0;
 	    
-	    if(bitplane & 0x80)
-		result[count] |= value;
-	
-	    if(bitplane & 0x40)
-		result[count + 1] |= value;
-	
-	    if(bitplane & 0x20)
-		result[count + 2] |= value;
+	    for(k = 0; k < scanLineSize; k++) /* Iterate over each byte containing 8 pixels */
+	    {
+		amiVideo_UByte bitplane = bitplanes[hOffset];
+		unsigned char bitmask = 0x80;
+		unsigned int l;
 		
-	    if(bitplane & 0x10)
-		result[count + 3] |= value;
-	
-	    if(bitplane & 0x08)
-		result[count + 4] |= value;
-	
-	    if(bitplane & 0x04)
-		result[count + 5] |= value;
-	
-	    if(bitplane & 0x02)
-		result[count + 6] |= value;
-	
-	    if(bitplane & 0x01)
-		result[count + 7] |= value;
-	
-	    count += 8;
+		for(l = 0; l < 8; l++) /* Iterate over each bit representing a pixel */
+		{
+		    if(pixelCount < screenWidth) /* We must skip the padding bits. If we have already converted sufficient pixels on this scanline, ignore the rest */
+		    {
+			if(bitplane & bitmask)
+			    result[count] |= indexBit;
+			
+			count++;
+		    }
+		    
+		    pixelCount++;
+		    bitmask >>= 1;
+		}
+		
+		hOffset++;
+	    }
+	    
+	    count += screenPitch - screenWidth; /* Skip the padding bytes in the output */
+	    
+	    vOffset += scanLineSize;
 	}
     }
     
     return result;
 }
 
-amiVideo_UByte *amiVideo_bitplanesToChunky(amiVideo_UByte *bitplanes, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth)
+amiVideo_UByte *amiVideo_bitplanesToChunky(amiVideo_UByte *bitplanes, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int screenPitch, const unsigned int bitplaneDepth)
 {
     amiVideo_UByte *bitplanePointers[MAX_NUM_OF_BITPLANES];
     unsigned int i;
     unsigned int offset = 0;
-    unsigned int bitplaneSize = screenWidth / 8 * screenHeight;
+    unsigned int bitplaneSize = calculateScanLineSize(screenWidth) * screenHeight;
     
     /* Set bitplane pointers */
     
@@ -92,15 +106,15 @@ amiVideo_UByte *amiVideo_bitplanesToChunky(amiVideo_UByte *bitplanes, const unsi
     }
     
     /* Convert bitplanes to chunky pixels */
-    return amiVideo_bitplaneMemoryToChunky(bitplanePointers, screenWidth, screenHeight, bitplaneDepth);
+    return amiVideo_bitplaneMemoryToChunky(bitplanePointers, screenWidth, screenHeight, screenPitch, bitplaneDepth);
 }
 
-amiVideo_OutputColor *amiVideo_bitplanesToRGB(amiVideo_UByte *bitplanes, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth, const amiVideo_Color *color, const unsigned int colorLength, const unsigned int numOfColorBits, const amiVideo_Long viewportMode)
+amiVideo_OutputColor *amiVideo_bitplanesToRGB(amiVideo_UByte *bitplanes, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int screenPitch, const unsigned int bitplaneDepth, const amiVideo_Color *color, const unsigned int colorLength, const unsigned int numOfColorBits, const amiVideo_Long viewportMode)
 {
-    amiVideo_UByte *bytes = amiVideo_bitplanesToChunky(bitplanes, screenWidth, screenHeight, bitplaneDepth);
+    amiVideo_UByte *bytes = amiVideo_bitplanesToChunky(bitplanes, screenWidth, screenHeight, screenPitch, bitplaneDepth);
     unsigned int paletteSize;
     amiVideo_OutputColor *palette = amiVideo_computePalette(color, colorLength, numOfColorBits, viewportMode, &paletteSize);
-    amiVideo_OutputColor *result = (amiVideo_OutputColor*)malloc(screenWidth * screenHeight * sizeof(amiVideo_OutputColor));
+    amiVideo_OutputColor *result = (amiVideo_OutputColor*)malloc(screenPitch * screenHeight * sizeof(amiVideo_OutputColor));
     unsigned int i;
     
     if(amiVideo_checkHoldAndModify(viewportMode))
@@ -114,7 +128,7 @@ amiVideo_OutputColor *amiVideo_bitplanesToRGB(amiVideo_UByte *bitplanes, const u
 	    unsigned int j;
 	    amiVideo_OutputColor previousResult = palette[0];
 	    
-	    for(j = 0; j < screenWidth; j++)
+	    for(j = 0; j < screenPitch; j++)
 	    {
 		amiVideo_UByte byte = bytes[offset + j];
 		amiVideo_UByte mode = (byte & (0x3 << (bitplaneDepth - 2))) >> (bitplaneDepth - 2);
@@ -141,13 +155,13 @@ amiVideo_OutputColor *amiVideo_bitplanesToRGB(amiVideo_UByte *bitplanes, const u
 		previousResult = result[offset + j];
 	    }
 	    
-	    offset += screenWidth;
+	    offset += screenPitch;
 	}
     }
     else
     {
 	/* Normal mode */
-	for(i = 0; i < screenWidth * screenHeight; i++)
+	for(i = 0; i < screenPitch * screenHeight; i++)
 	    result[i] = palette[bytes[i]];
     }
     
@@ -188,8 +202,8 @@ void amiVideo_chunkyToBitplaneMemory(amiVideo_UByte **bitplanePointers, const am
 
 amiVideo_UByte *amiVideo_chunkyToBitplanes(const amiVideo_UByte *pixels, const unsigned int screenWidth, const unsigned int screenHeight, const unsigned int bitplaneDepth)
 {
-    unsigned int bitplaneSize = screenWidth / 8 * screenHeight;
-    amiVideo_UByte *result = (amiVideo_UByte*)malloc(bitplaneSize * bitplaneDepth * sizeof(amiVideo_UByte));
+    unsigned int bitplaneSize = calculateScanLineSize(screenWidth) * screenHeight;
+    amiVideo_UByte *result = (amiVideo_UByte*)calloc(bitplaneSize * bitplaneDepth, sizeof(amiVideo_UByte)); /* Fill with 0 bytes */
     amiVideo_UByte *bitplanePointers[MAX_NUM_OF_BITPLANES];
     unsigned int i;
     unsigned int offset = 0;
