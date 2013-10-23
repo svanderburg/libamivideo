@@ -23,10 +23,68 @@
 
 int amiVideo_checkExtraHalfbrite(const amiVideo_Long viewportMode)
 {
-    return (viewportMode & AMIVIDEO_VIDEOPORTMODE_EHB);
+    return ((viewportMode & AMIVIDEO_VIDEOPORTMODE_EHB) == AMIVIDEO_VIDEOPORTMODE_EHB);
 }
 
 int amiVideo_checkHoldAndModify(const amiVideo_Long viewportMode)
 {
-    return (viewportMode & AMIVIDEO_VIDEOPORTMODE_HAM);
+    return ((viewportMode & AMIVIDEO_VIDEOPORTMODE_HAM) == AMIVIDEO_VIDEOPORTMODE_HAM);
+}
+
+int amiVideo_checkHires(const amiVideo_Long viewportMode)
+{
+    return ((viewportMode & AMIVIDEO_VIDEOPORTMODE_HIRES) == AMIVIDEO_VIDEOPORTMODE_HIRES);
+}
+
+int amiVideo_checkSuperHires(const amiVideo_Long viewportMode)
+{
+    return ((viewportMode & AMIVIDEO_VIDEOPORTMODE_SUPERHIRES) == AMIVIDEO_VIDEOPORTMODE_SUPERHIRES);
+}
+
+int amiVideo_checkLaced(const amiVideo_Long viewportMode)
+{
+    return ((viewportMode & AMIVIDEO_VIDEOPORTMODE_LACE) == AMIVIDEO_VIDEOPORTMODE_LACE);
+}
+
+amiVideo_ColorFormat amiVideo_autoSelectColorFormat(const amiVideo_Long viewportMode)
+{
+    if(amiVideo_checkHoldAndModify(viewportMode))
+        return AMIVIDEO_RGB_FORMAT;
+    else
+        return AMIVIDEO_CHUNKY_FORMAT;
+}
+
+unsigned int amiVideo_autoSelectLowresPixelScaleFactor(const amiVideo_Long viewportMode)
+{
+    if(amiVideo_checkSuperHires(viewportMode))
+	return 4;
+    else if(amiVideo_checkHires(viewportMode) && amiVideo_checkLaced(viewportMode))
+	return 1;
+    else if(amiVideo_checkHires(viewportMode) && !amiVideo_checkLaced(viewportMode))
+	return 2;
+    else if(amiVideo_checkLaced(viewportMode))
+	return 2;
+    else
+	return 1;
+}
+
+amiVideo_Long amiVideo_extractPaletteFlags(const amiVideo_Long viewportMode)
+{
+    return viewportMode & (AMIVIDEO_VIDEOPORTMODE_HAM | AMIVIDEO_VIDEOPORTMODE_EHB);
+}
+
+amiVideo_Long amiVideo_autoSelectViewportMode(const amiVideo_Word width, const amiVideo_Word height)
+{
+    amiVideo_Long viewportMode = 0;
+    
+    if(width > 736)
+	viewportMode |= AMIVIDEO_VIDEOPORTMODE_SUPERHIRES; /* If the page width is larger than 736 (640 width + max overscan), we use super hi-res screen mode */
+    else if(width > 368)
+	viewportMode |= AMIVIDEO_VIDEOPORTMODE_HIRES; /* If the page width is larger than 368 (320 width + max overscan), we use hi-res screen mode */
+
+    /* If the page height is larger than 290 (256 height + max overscan), we have a laced screen mode */
+    if(height > 290)
+	viewportMode |= AMIVIDEO_VIDEOPORTMODE_LACE;
+
+    return viewportMode;
 }

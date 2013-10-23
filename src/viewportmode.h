@@ -23,8 +23,18 @@
 #define __AMIVIDEO_VIEWPORTMODE_H
 #include "amivideotypes.h"
 
+#define AMIVIDEO_VIDEOPORTMODE_LACE 0x0004
 #define AMIVIDEO_VIDEOPORTMODE_EHB 0x80
 #define AMIVIDEO_VIDEOPORTMODE_HAM 0x800
+#define AMIVIDEO_VIDEOPORTMODE_HIRES 0x8000
+#define AMIVIDEO_VIDEOPORTMODE_SUPERHIRES 0x8020
+
+typedef enum
+{
+    AMIVIDEO_CHUNKY_FORMAT = 1,
+    AMIVIDEO_RGB_FORMAT = 4
+}
+amiVideo_ColorFormat;
 
 /**
  * Checks whether the Extra-Halfbrite (EHB) bit is enabled in the viewport mode register.
@@ -41,5 +51,69 @@ int amiVideo_checkExtraHalfbrite(const amiVideo_Long viewportMode);
  * @return TRUE if Extra-Halfbrite is enabled, else FALSE
  */
 int amiVideo_checkHoldAndModify(const amiVideo_Long viewportMode);
+
+/**
+ * Checks whether the hires bit is enabled in the viewport mode register.
+ *
+ * @param viewportMode Amiga viewport register value
+ * @return TRUE if the hires bit is enabled, else FALSE
+ */
+int amiVideo_checkHires(const amiVideo_Long viewportMode);
+
+/**
+ * Checks whether the super and hires bits are enabled in the viewport mode
+ * register.
+ *
+ * @param viewportMode Amiga viewport register value
+ * @return TRUE if the hires and super bits are enabled, else FALSE
+ */
+int amiVideo_checkSuperHires(const amiVideo_Long viewportMode);
+
+/**
+ * Checks whether the hires bit is enabled in the viewport mode register.
+ *
+ * @param viewportMode Amiga viewport register value
+ * @return TRUE if the hires bit is enabled, else FALSE
+ */
+int amiVideo_checkLaced(const amiVideo_Long viewportMode);
+
+/**
+ * Auto selects the most efficient display format for displaying the converted
+ * screen. In practice, this means the chunky format always suffices except for
+ * screens using the HAM display mode, which can display more than 256 colors.
+ * For the latter case, the RGB format should be used.
+ *
+ * @param viewportMode Amiga viewport register value
+ * @return The most efficient color format
+ */
+amiVideo_ColorFormat amiVideo_autoSelectColorFormat(const amiVideo_Long viewportMode);
+
+/**
+ * Auto selects the most space efficient lowres pixel scale factor capable of
+ * retaining the right aspect ratio on non-Amiga displays.
+ *
+ * @param viewportMode Amiga viewport register value
+ * @return The most efficient lowres pixel scale factor
+ */
+unsigned int amiVideo_autoSelectLowresPixelScaleFactor(const amiVideo_Long viewportMode);
+
+/**
+ * Extracts the palette flag values bits (Extra Half Brite and Hold-and Modify)
+ * from the viewport mode value.
+ *
+ * @param viewportMode Amiga viewport register value
+ * @return A viewport mode value with only the EHB and HAM flags set
+ */
+amiVideo_Long amiVideo_extractPaletteFlags(const amiVideo_Long viewportMode);
+
+/**
+ * Auto selects the most suitable Amiga resolution viewport flags to display a
+ * given screen.
+ *
+ * @param width Width of the screen
+ * @param height Height of the screen
+ * @return A viewport mode value with the most suitable resolution flags set
+ */
+amiVideo_Long amiVideo_autoSelectViewportMode(const amiVideo_Word width, const amiVideo_Word height);
 
 #endif
