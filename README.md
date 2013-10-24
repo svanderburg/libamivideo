@@ -479,9 +479,43 @@ To convert the chunky pixels to bitplanes, we can do:
 Cleaning up the screen conversion struct
 ----------------------------------------
 After performing a conversion, we may remove the converstion struct's properties
-from memory:
+from memory once we don't need them anymore:
 
     amiVideo_cleanupScreen(&conversionScreen);
+
+Miscellaneous functions
+=======================
+In the previous code examples, we have used various fixed values for certain
+properties. This library also provides a number of functions that can auto select
+them for you.
+
+Auto selecting a suitable color format
+--------------------------------------
+    /* Returns AMIVIDEO_RGB_FORMAT */
+    amiVideo_ColorFormat format = amiVideo_autoSelectColorFormat(AMIVIDEO_VIDEOPORTMODE_HAM);
+
+The above function invocation auto selects the most memory efficient color format
+for a given viewport mode. In the example, it returns AMIVIDEO_RGB_FORMAT since
+we have to display more than 256 colors.
+
+Auto selecting a lowres pixel scale factor
+------------------------------------------
+    /* Returns 4 */
+    amiVideo_autoSelectLowresPixelScaleFactor(AMIVIDEO_VIDEOPORTMODE_SUPERHIRES);
+
+This function invocation auto selects the most memory efficient lowres pixel
+scale factor for a given viewport mode. The above example needs 4 bytes for a
+lowres pixel since super hires screens are at least 1280 pixels per scanline.
+
+Auto selecting a viewport mode
+------------------------------
+    /* Returns AMIVIDEO_VIDEOPORTMODE_SUPERHIRES | AMIVIDEO_VIDEOPORTMODE_LACE */
+    amiVideo_autoSelectViewportMode(1280, 512);
+
+The above function invocation auto selects the best suitable resolution viewport
+mode bits for a screen with the given dimensions. To properly display an 1280x512
+image on an Amiga display, we have to use a interlaced screen with super hires
+resolution.
 
 Installation
 ============
