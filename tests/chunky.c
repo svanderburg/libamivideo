@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "bitplane.h"
+#include "screen.h"
 
 #define WIDTH 32
 #define HEIGHT 20
@@ -32,9 +32,19 @@ amiVideo_UByte pixels[] = {
 
 int main(int argc, char *argv[])
 {
-    amiVideo_UByte *bitplanes = amiVideo_chunkyToBitplanes(pixels, WIDTH, HEIGHT, BITPLANE_DEPTH);
-    amiVideo_UByte *newPixels = amiVideo_bitplanesToChunky(bitplanes, WIDTH, HEIGHT, BITPLANE_DEPTH);
+    amiVideo_UByte *newPixels = (amiVideo_UByte*)malloc(WIDTH * HEIGHT * sizeof(amiVideo_UByte));
+    amiVideo_UByte *bitplanes = (amiVideo_UByte*)malloc(WIDTH * HEIGHT * sizeof(amiVideo_UByte));
+    amiVideo_Screen screen;
     int status;
+    
+    memcpy(newPixels, pixels, WIDTH * HEIGHT * sizeof(amiVideo_UByte));
+    
+    amiVideo_initScreen(&screen, WIDTH, HEIGHT, BITPLANE_DEPTH, 8, 0);
+    amiVideo_setScreenUncorrectedChunkyPixelsPointer(&screen, newPixels, WIDTH);
+    amiVideo_setScreenBitplanes(&screen, bitplanes);
+    
+    amiVideo_convertScreenChunkyPixelsToBitplanes(&screen);
+    amiVideo_convertScreenBitplanesToChunkyPixels(&screen);
     
     if(memcmp(pixels, newPixels, WIDTH * HEIGHT) == 0)
 	status = 0;
@@ -45,7 +55,7 @@ int main(int argc, char *argv[])
     }
     
     free(bitplanes);
-    free(newPixels);
+    amiVideo_cleanupScreen(&screen);
     
     return status;
 }
