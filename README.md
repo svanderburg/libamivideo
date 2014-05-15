@@ -179,7 +179,7 @@ of the palette are converted from 4 bits to 8 bits:
     #include <SDL.h>
     
     /* Create a SDL surface having 8 bits per pixel in which the output is stored */
-    SDL_Surface *surface = SDL_CreateRGBSurface(SDL_SWSURFACE, screen.width, screen.height, 8, 0, 0, 0, 0);
+    SDL_Surface *surface = SDL_CreateRGBSurface(0, screen.width, screen.height, 8, 0, 0, 0, 0);
     
     /*
      * Convert the colors of the palette from 4 bits per color component to 8
@@ -188,7 +188,7 @@ of the palette are converted from 4 bits to 8 bits:
     amiVideo_convertBitplaneColorsToChunkyFormat(&screen.palette);
     
     /* Set the palette of the target SDL surface */
-    if(SDL_SetPalette(surface, SDL_LOGPAL | SDL_PHYSPAL, (SDL_Color*)screen.palette.chunkyFormat.color, 0, screen.palette.chunkyFormat.numOfColors) == 0)
+    if(SDL_SetPaletteColors(surface->format->palette, (SDL_Color*)screen.palette.chunkyFormat.color, 0, screen.palette.chunkyFormat.numOfColors) == 0)
     {
         fprintf(stderr, "Cannot set palette of the surface!\n");
         return 1;
@@ -199,7 +199,7 @@ of the palette are converted from 4 bits to 8 bits:
     
     /* Convert the bitplanes to chunky pixels */
     
-    if(SDL_LockSurface(surface) == 1)
+    if(SDL_LockSurface(surface) != 0)
     {
         fprintf(stderr, "Cannot lock the surface!\n");
         return 1;
@@ -219,13 +219,13 @@ do the following:
     #include <SDL.h>
     
     /* Create a SDL surface having 24 bits per pixel in which the output is stored */
-    SDL_Surface *surface = SDL_CreateRGBSurface(SDL_SWSURFACE, screen.width, screen.height, 24, 0, 0, 0, 0);
+    SDL_Surface *surface = SDL_CreateRGBSurface(0, screen.width, screen.height, 24, 0, 0, 0, 0);
     
     /* Set the uncorrected RGB pixels pointer of the conversion struct to that of the SDL pixel surface */
     amiVideo_setScreenUncorrectedRGBPixelsPointer(&screen, surface->pixels, surface->pitch, TRUE, surface->format->Rshift, surface->format->Gshift, surface->format->Bshift);
     
     /* Convert the bitplanes to RGB pixels */
-    if(SDL_LockSurface(surface) == 1)
+    if(SDL_LockSurface(surface) != 0)
     {
         fprintf(stderr, "Cannot lock the surface!\n");
         return 1;
@@ -261,7 +261,7 @@ surface:
      * The correctedFormat sub struct provides us the dimensions of the corrected
      * surface.
      */
-    surface = SDL_CreateRGBSurface(SDL_SWSURFACE, screen.correctedFormat.width, screen.correctedFormat.height, 8, 0, 0, 0, 0);
+    surface = SDL_CreateRGBSurface(0, screen.correctedFormat.width, screen.correctedFormat.height, 8, 0, 0, 0, 0);
     
     /*
      * Convert the colors of the palette from 4 bits per color component to 8
@@ -270,7 +270,7 @@ surface:
     amiVideo_convertBitplaneColorsToChunkyFormat(&screen.palette);
     
     /* Set the palette of the target SDL surface */
-    if(SDL_SetPalette(surface, SDL_LOGPAL | SDL_PHYSPAL, (SDL_Color*)screen.palette.chunkyFormat.color, 0, screen.palette.chunkyFormat.numOfColors) == 0)
+    if(SDL_SetPaletteColors(surface->format->palette, (SDL_Color*)screen.palette.chunkyFormat.color, 0, screen.palette.chunkyFormat.numOfColors) == 0)
     {
         fprintf(stderr, "Cannot set palette of the surface!\n");
         return 1;
@@ -280,7 +280,7 @@ surface:
     amiVideo_setScreenCorrectedPixelsPointer(&screen, surface->pixels, surface->pitch, 1, TRUE, 0, 0, 0);
     
     /* Convert the bitplanes to corrected chunky pixels */
-    if(SDL_LockSurface(surface) == 1)
+    if(SDL_LockSurface(surface) != 0)
     {
         fprintf(stderr, "Cannot lock the surface!\n");
         return 1;
@@ -310,13 +310,13 @@ The following example code converts a planar screen to a corrected RGB surface:
      * stored. The correctedFormat sub struct provides us the dimensions of the
      * corrected surface.
      */
-    surface = SDL_CreateRGBSurface(SDL_SWSURFACE, screen->correctedFormat.width, screen->correctedFormat.height, 24, 0, 0, 0, 0);
+    surface = SDL_CreateRGBSurface(0, screen->correctedFormat.width, screen->correctedFormat.height, 24, 0, 0, 0, 0);
     
     /* Set the corrected RGB pixels pointer of the conversion struct to the SDL pixel surface */
     amiVideo_setScreenCorrectedPixelsPointer(&screen, surface->pixels, surface->pitch, 4, TRUE, surface->format->Rshift, surface->format->Gshift, surface->format->Bshift);
     
     /* Convert the bitplanes to corrected RGB pixels */
-    if(SDL_LockSurface(surface) == 1)
+    if(SDL_LockSurface(surface) != 0)
     {
         fprintf(stderr, "Cannot lock the surface!\n");
         return 1;
