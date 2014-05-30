@@ -33,6 +33,14 @@ let
           src = tarball;
         }
       )) //
+        ({ i686-windows =
+           pkgs.dotnetenv.buildSolution {
+             name = "libamivideo";
+             src = ./.;
+             baseDir = "src";
+             slnFile = "libamivideo.sln";
+           };
+        }) //
       (pkgs.lib.optionalAttrs (buildForAmiga)
         (let
           amigaosenv = import amigaosenvPath {
