@@ -1,6 +1,7 @@
 { nixpkgs ? <nixpkgs>
 , systems ? [ "i686-linux" "x86_64-linux" ]
 , buildForAmiga ? false
+, buildForWindows ? false
 , amigaosenvPath ? <amigaosenv>
 , libamivideo ? {outPath = ./.; rev = 1234;}
 , officialRelease ? false
@@ -33,12 +34,16 @@ let
           src = tarball;
         }
       )) //
-        ({ i686-windows =
+        (pkgs.lib.optionalAttrs (buildForWindows) { i686-windows =
            pkgs.dotnetenv.buildSolution {
              name = "libamivideo";
              src = ./.;
              baseDir = "src";
              slnFile = "libamivideo.sln";
+             postInstall = ''
+               mkdir -p $out/include/libamivideo
+               cp -v libamivideo/*.h $out/include/libamivideo
+             '';
            };
         }) //
       (pkgs.lib.optionalAttrs (buildForAmiga)
