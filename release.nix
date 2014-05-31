@@ -32,6 +32,7 @@ let
           name = "libamivideo";
           inherit version;
           src = tarball;
+          CFLAGS = "-ansi -pedantic -Wall";
         }
       )) //
         (pkgs.lib.optionalAttrs (buildForWindows) { i686-windows =
