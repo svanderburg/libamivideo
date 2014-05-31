@@ -529,10 +529,10 @@ mode bits for a screen with the given dimensions. To properly display an 1280x51
 image on an Amiga display, we have to use a interlaced screen with super hires
 resolution.
 
-Installation
-============
-Compilation and installation of this library is straight forward, by using the
-standard GNU autotools build instructions:
+Installation on Unix-like systems
+=================================
+Compilation and installation of this library on Unix-like systems is straight
+forward, by using the standard GNU autotools build instructions:
 
     $ ./configure
     $ make
@@ -540,6 +540,18 @@ standard GNU autotools build instructions:
 
 More details about the installation process can be found in the `INSTALL` file
 included in this package.
+
+Building with Visual C++
+========================
+This package can also be built with Visual C++ for Windows platforms. The
+solution file resides in `src/libamivideo.sln` that can be used in Visual Studio
+to edit and build it.
+
+Alternatively, you can also build it with `MSBuild` from the command-line:
+
+    $ MSBuild libamivideo.sln
+
+The output is produced in the `Debug/` directory.
 
 License
 =======
