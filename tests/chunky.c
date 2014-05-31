@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "screen.h"
+#include <screen.h>
 
 #define WIDTH 32
 #define HEIGHT 20
