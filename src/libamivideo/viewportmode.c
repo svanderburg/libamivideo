@@ -46,14 +46,6 @@ int amiVideo_checkLaced(const amiVideo_Long viewportMode)
     return ((viewportMode & AMIVIDEO_VIDEOPORTMODE_LACE) == AMIVIDEO_VIDEOPORTMODE_LACE);
 }
 
-amiVideo_ColorFormat amiVideo_autoSelectColorFormat(const amiVideo_Long viewportMode)
-{
-    if(amiVideo_checkHoldAndModify(viewportMode))
-        return AMIVIDEO_RGB_FORMAT;
-    else
-        return AMIVIDEO_CHUNKY_FORMAT;
-}
-
 unsigned int amiVideo_autoSelectLowresPixelScaleFactor(const amiVideo_Long viewportMode)
 {
     if(amiVideo_checkSuperHires(viewportMode))

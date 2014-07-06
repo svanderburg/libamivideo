@@ -166,14 +166,14 @@ void amiVideo_setScreenCorrectedPixelsPointer(amiVideo_Screen *screen, void *pix
     }
 }
 
-void amiVideo_convertScreenBitplanesToChunkyPixels(amiVideo_Screen *screen)
+static void convertScreenBitplanesToTarget(amiVideo_Screen *screen, int chunky)
 {
     unsigned int i;
     
     for(i = 0; i < screen->bitplaneDepth; i++) /* Iterate over each bitplane */
     {
 	unsigned int count = 0;
-	amiVideo_UByte indexBit = 1 << i;
+	amiVideo_ULong indexBit = 1 << i;
 	amiVideo_UByte *bitplanes = screen->bitplaneFormat.bitplanes[i];
 	unsigned int vOffset = 0;
 	unsigned int j;
@@ -195,8 +195,12 @@ void amiVideo_convertScreenBitplanesToChunkyPixels(amiVideo_Screen *screen)
 		    if(pixelCount < screen->width) /* We must skip the padding bits. If we have already converted sufficient pixels on this scanline, ignore the rest */
 		    {
 			if(bitplane & bitmask)
-			    screen->uncorrectedChunkyFormat.pixels[count] |= indexBit;
-			
+			{
+			    if(chunky)
+			        screen->uncorrectedChunkyFormat.pixels[count] |= indexBit;
+			    else
+			        screen->uncorrectedRGBFormat.pixels[count] |= indexBit;
+			}
 			count++;
 		    }
 		    
@@ -207,11 +211,20 @@ void amiVideo_convertScreenBitplanesToChunkyPixels(amiVideo_Screen *screen)
 		hOffset++;
 	    }
 	    
-	    count += screen->uncorrectedChunkyFormat.pitch - screen->width; /* Skip the padding bytes in the output */
+	    /* Skip the padding bytes in the output */
+	    if(chunky)
+	        count += screen->uncorrectedChunkyFormat.pitch - screen->width; 
+	    else
+	        count += screen->uncorrectedRGBFormat.pitch / 4 - screen->width; 
 	    
 	    vOffset += screen->bitplaneFormat.pitch;
 	}
     }
+}
+
+void amiVideo_convertScreenBitplanesToChunkyPixels(amiVideo_Screen *screen)
+{
+    convertScreenBitplanesToTarget(screen, TRUE);
 }
 
 static amiVideo_ULong convertColorToRGBPixel(const amiVideo_OutputColor *color, amiVideo_UByte rshift, amiVideo_UByte gshift, amiVideo_UByte bshift)
@@ -300,7 +313,7 @@ void amiVideo_convertScreenChunkyPixelsToBitplanes(amiVideo_Screen *screen)
 	}
 	
 	bit--;
-	    
+	
 	if(bit < 0)
 	{
 	    bit = 7; /* Reset the bit counter */
@@ -374,9 +387,14 @@ void amiVideo_correctScreenPixels(amiVideo_Screen *screen)
 
 void amiVideo_convertScreenBitplanesToRGBPixels(amiVideo_Screen *screen)
 {
-    amiVideo_convertBitplaneColorsToChunkyFormat(&screen->palette);
-    amiVideo_convertScreenBitplanesToChunkyPixels(screen);
-    amiVideo_convertScreenChunkyPixelsToRGBPixels(screen);
+    if(screen->bitplaneDepth == 24 || screen->bitplaneDepth == 32)
+        convertScreenBitplanesToTarget(screen, FALSE);
+    else
+    {
+        amiVideo_convertBitplaneColorsToChunkyFormat(&screen->palette);
+        amiVideo_convertScreenBitplanesToChunkyPixels(screen);
+        amiVideo_convertScreenChunkyPixelsToRGBPixels(screen);
+    }
 }
 
 void amiVideo_convertScreenBitplanesToCorrectedChunkyPixels(amiVideo_Screen *screen)
@@ -395,4 +413,12 @@ void amiVideo_convertScreenChunkyPixelsToCorrectedRGBPixels(amiVideo_Screen *scr
 {
     amiVideo_convertScreenChunkyPixelsToRGBPixels(screen);
     amiVideo_correctScreenPixels(screen);
+}
+
+amiVideo_ColorFormat amiVideo_autoSelectColorFormat(const amiVideo_Screen *screen)
+{
+    if(amiVideo_checkHoldAndModify(screen->viewportMode) || screen->bitplaneDepth == 24 || screen->bitplaneDepth == 32)
+        return AMIVIDEO_RGB_FORMAT;
+    else
+        return AMIVIDEO_CHUNKY_FORMAT;
 }

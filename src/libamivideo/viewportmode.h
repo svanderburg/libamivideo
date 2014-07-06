@@ -29,13 +29,6 @@
 #define AMIVIDEO_VIDEOPORTMODE_HIRES 0x8000
 #define AMIVIDEO_VIDEOPORTMODE_SUPERHIRES 0x8020
 
-typedef enum
-{
-    AMIVIDEO_CHUNKY_FORMAT = 1,
-    AMIVIDEO_RGB_FORMAT = 4
-}
-amiVideo_ColorFormat;
-
 /**
  * Checks whether the Extra-Halfbrite (EHB) bit is enabled in the viewport mode register.
  *
@@ -76,17 +69,6 @@ int amiVideo_checkSuperHires(const amiVideo_Long viewportMode);
  * @return TRUE if the hires bit is enabled, else FALSE
  */
 int amiVideo_checkLaced(const amiVideo_Long viewportMode);
-
-/**
- * Auto selects the most efficient display format for displaying the converted
- * screen. In practice, this means the chunky format always suffices except for
- * screens using the HAM display mode, which can display more than 256 colors.
- * For the latter case, the RGB format should be used.
- *
- * @param viewportMode Amiga viewport register value
- * @return The most efficient color format
- */
-amiVideo_ColorFormat amiVideo_autoSelectColorFormat(const amiVideo_Long viewportMode);
 
 /**
  * Auto selects the most space efficient lowres pixel scale factor capable of

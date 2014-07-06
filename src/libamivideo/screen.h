@@ -1,7 +1,7 @@
 #ifndef __AMIVIDEO_SCREEN_H
 #define __AMIVIDEO_SCREEN_H
 
-#define AMIVIDEO_MAX_NUM_OF_BITPLANES 8
+#define AMIVIDEO_MAX_NUM_OF_BITPLANES 32
 
 #include "amivideotypes.h"
 #include "palette.h"
@@ -70,7 +70,7 @@ struct amiVideo_Screen
      */
     struct
     {
-	/** Contains the padded screen width in pixels */
+	/** Contains the padded screen width in bytes */
 	unsigned int pitch;
 	
 	/** Contains the pixel data in which each byte represents an index in the palette */
@@ -90,7 +90,7 @@ struct amiVideo_Screen
      */
     struct
     {
-	/** Contains the padded screen width in pixels (usually rounded up to the nearest 4-byte boundary) */
+	/** Contains the padded screen width in bytes (usually rounded up to the nearest 4-byte boundary) */
 	unsigned int pitch;
 	
 	/** Contains the amount of bytes that we have to left shift the red color component */
@@ -140,6 +140,13 @@ struct amiVideo_Screen
     }
     correctedFormat;
 };
+
+typedef enum
+{
+    AMIVIDEO_CHUNKY_FORMAT = 1,
+    AMIVIDEO_RGB_FORMAT = 4
+}
+amiVideo_ColorFormat;
 
 /**
  * Initializes a screen instance with the given dimensions, bitplane depth,
@@ -330,5 +337,15 @@ void amiVideo_convertScreenBitplanesToCorrectedRGBPixels(amiVideo_Screen *screen
  * @param screen Screen conversion structure
  */
 void amiVideo_convertScreenChunkyPixelsToCorrectedRGBPixels(amiVideo_Screen *screen);
+
+/**
+ * Auto selects the most efficient display format for displaying the converted
+ * screen. It picks RGB format for HAM displays and when 24 or 32 bitplanes are
+ * used. In all other cases, it picks chunky format.
+ *
+ * @param viewportMode Amiga viewport register value
+ * @return The most efficient color format
+ */
+amiVideo_ColorFormat amiVideo_autoSelectColorFormat(const amiVideo_Screen *screen);
 
 #endif
