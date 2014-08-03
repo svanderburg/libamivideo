@@ -225,7 +225,7 @@ do the following:
     SDL_Surface *surface = SDL_CreateRGBSurface(0, screen.width, screen.height, 24, 0, 0, 0, 0);
     
     /* Set the uncorrected RGB pixels pointer of the conversion struct to that of the SDL pixel surface */
-    amiVideo_setScreenUncorrectedRGBPixelsPointer(&screen, surface->pixels, surface->pitch, TRUE, surface->format->Rshift, surface->format->Gshift, surface->format->Bshift);
+    amiVideo_setScreenUncorrectedRGBPixelsPointer(&screen, surface->pixels, surface->pitch, TRUE, surface->format->Rshift, surface->format->Gshift, surface->format->Bshift, surface->format->Ashift);
     
     /* Convert the bitplanes to RGB pixels */
     if(SDL_MUSTLOCK(surface) && SDL_LockSurface(surface) != 0)
@@ -322,7 +322,7 @@ The following example code converts a planar screen to a corrected RGB surface:
     surface = SDL_CreateRGBSurface(0, screen->correctedFormat.width, screen->correctedFormat.height, 24, 0, 0, 0, 0);
     
     /* Set the corrected RGB pixels pointer of the conversion struct to the SDL pixel surface */
-    amiVideo_setScreenCorrectedPixelsPointer(&screen, surface->pixels, surface->pitch, 4, TRUE, surface->format->Rshift, surface->format->Gshift, surface->format->Bshift);
+    amiVideo_setScreenCorrectedPixelsPointer(&screen, surface->pixels, surface->pitch, 4, TRUE, surface->format->Rshift, surface->format->Gshift, surface->format->Bshift, surface->format->Ashift);
     
     /* Convert the bitplanes to corrected RGB pixels */
     if(SDL_MUSTLOCK(surface) && SDL_LockSurface(surface) != 0)

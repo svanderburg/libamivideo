@@ -93,14 +93,17 @@ struct amiVideo_Screen
 	/** Contains the padded screen width in bytes (usually rounded up to the nearest 4-byte boundary) */
 	unsigned int pitch;
 	
-	/** Contains the amount of bytes that we have to left shift the red color component */
+	/** Contains the amount of bits that we have to left shift the red color component */
 	amiVideo_UByte rshift;
 	
-	/** Contains the amount of bytes that we have to left shift the green color component */
+	/** Contains the amount of bits that we have to left shift the green color component */
 	amiVideo_UByte gshift;
 	
-	/** Contains the amount of bytes that we have to left shift the blue color component */
+	/** Contains the amount of bits that we have to left shift the blue color component */
 	amiVideo_UByte bshift;
+	
+	/** Contains the amount of bits that we have to left shift the alpha color component */
+	amiVideo_UByte ashift;
 	
 	/** Contains the pixel data in which each four bytes represent red, glue, blue values and a padding byte */
 	amiVideo_ULong *pixels;
@@ -253,11 +256,12 @@ void amiVideo_setScreenUncorrectedChunkyPixelsPointer(amiVideo_Screen *screen, a
  * @param pixels Pointer to a memory area storing RGB pixels
  * @param pitch Padded width of the memory surface in bytes (usually 4 * width, but it may be padded)
  * @param allocateUncorrectedMemory Indicates whether we should allocate memory for a chunky pixels buffer that should be freed
- * @param rshift The amount of bytes that we have to left shift the red color component
- * @param gshift The amount of bytes that we have to left shift the green color component
- * @param bshift The amount of bytes that we have to left shift the blue color component
+ * @param rshift The amount of bits that we have to left shift the red color component
+ * @param gshift The amount of bits that we have to left shift the green color component
+ * @param bshift The amount of bits that we have to left shift the blue color component
+ * @param ashift The amount of bits that we have to left shift the alpha color component
  */
-void amiVideo_setScreenUncorrectedRGBPixelsPointer(amiVideo_Screen *screen, amiVideo_ULong *pixels, unsigned int pitch, int allocateUncorrectedMemory, amiVideo_UByte rshift, amiVideo_UByte gshift, amiVideo_UByte bshift);
+void amiVideo_setScreenUncorrectedRGBPixelsPointer(amiVideo_Screen *screen, amiVideo_ULong *pixels, unsigned int pitch, int allocateUncorrectedMemory, amiVideo_UByte rshift, amiVideo_UByte gshift, amiVideo_UByte bshift, amiVideo_UByte ashift);
 
 /**
  * Sets the corrected pixels sub struct pointer to a memory area capable of
@@ -268,11 +272,12 @@ void amiVideo_setScreenUncorrectedRGBPixelsPointer(amiVideo_Screen *screen, amiV
  * @param pitch Padded width of the memory surface in bytes (equals witdth for chunky, 4 * width for RGB, but it may be padded)
  * @param bytesPerPixel Specifies of how many bytes a pixel consists (1 = chunky, 4 = RGB)
  * @param allocateUncorrectedMemory Indicates whether we should allocate memory for a chunky or RGB pixel buffer that should be freed
- * @param rshift The amount of bytes that we have to left shift the red color component
- * @param gshift The amount of bytes that we have to left shift the green color component
- * @param bshift The amount of bytes that we have to left shift the blue color component
+ * @param rshift The amount of bits that we have to left shift the red color component
+ * @param gshift The amount of bits that we have to left shift the green color component
+ * @param bshift The amount of bits that we have to left shift the blue color component
+ * @param ashift The amount of bits that we have to left shift the alpha color component
  */
-void amiVideo_setScreenCorrectedPixelsPointer(amiVideo_Screen *screen, void *pixels, unsigned int pitch, unsigned int bytesPerPixel, int allocateUncorrectedMemory, amiVideo_UByte rshift, amiVideo_UByte gshift, amiVideo_UByte bshift);
+void amiVideo_setScreenCorrectedPixelsPointer(amiVideo_Screen *screen, void *pixels, unsigned int pitch, unsigned int bytesPerPixel, int allocateUncorrectedMemory, amiVideo_UByte rshift, amiVideo_UByte gshift, amiVideo_UByte bshift, amiVideo_UByte ashift);
 
 /**
  * Converts the bitplanes to chunky pixels in which every byte represents a

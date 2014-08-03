@@ -118,7 +118,7 @@ void amiVideo_setScreenUncorrectedChunkyPixelsPointer(amiVideo_Screen *screen, a
     screen->uncorrectedChunkyFormat.memoryAllocated = FALSE;
 }
 
-void amiVideo_setScreenUncorrectedRGBPixelsPointer(amiVideo_Screen *screen, amiVideo_ULong *pixels, unsigned int pitch, int allocateUncorrectedMemory, amiVideo_UByte rshift, amiVideo_UByte gshift, amiVideo_UByte bshift)
+void amiVideo_setScreenUncorrectedRGBPixelsPointer(amiVideo_Screen *screen, amiVideo_ULong *pixels, unsigned int pitch, int allocateUncorrectedMemory, amiVideo_UByte rshift, amiVideo_UByte gshift, amiVideo_UByte bshift, amiVideo_UByte ashift)
 {
     screen->uncorrectedRGBFormat.pixels = pixels;
     screen->uncorrectedRGBFormat.pitch = pitch;
@@ -126,6 +126,7 @@ void amiVideo_setScreenUncorrectedRGBPixelsPointer(amiVideo_Screen *screen, amiV
     screen->uncorrectedRGBFormat.rshift = rshift;
     screen->uncorrectedRGBFormat.gshift = gshift;
     screen->uncorrectedRGBFormat.bshift = bshift;
+    screen->uncorrectedRGBFormat.ashift = ashift;
     
     if(allocateUncorrectedMemory)
     {
@@ -135,7 +136,7 @@ void amiVideo_setScreenUncorrectedRGBPixelsPointer(amiVideo_Screen *screen, amiV
     }
 }
 
-void amiVideo_setScreenCorrectedPixelsPointer(amiVideo_Screen *screen, void *pixels, unsigned int pitch, unsigned int bytesPerPixel, int allocateUncorrectedMemory, amiVideo_UByte rshift, amiVideo_UByte gshift, amiVideo_UByte bshift)
+void amiVideo_setScreenCorrectedPixelsPointer(amiVideo_Screen *screen, void *pixels, unsigned int pitch, unsigned int bytesPerPixel, int allocateUncorrectedMemory, amiVideo_UByte rshift, amiVideo_UByte gshift, amiVideo_UByte bshift, amiVideo_UByte ashift)
 {
     screen->correctedFormat.pixels = pixels;
     screen->correctedFormat.pitch = pitch;
@@ -155,6 +156,7 @@ void amiVideo_setScreenCorrectedPixelsPointer(amiVideo_Screen *screen, void *pix
 	    screen->uncorrectedRGBFormat.rshift = rshift;
 	    screen->uncorrectedRGBFormat.gshift = gshift;
 	    screen->uncorrectedRGBFormat.bshift = bshift;
+	    screen->uncorrectedRGBFormat.ashift = ashift;
 	}
 	else
 	    screen->uncorrectedRGBFormat.memoryAllocated = FALSE;
@@ -227,9 +229,9 @@ void amiVideo_convertScreenBitplanesToChunkyPixels(amiVideo_Screen *screen)
     convertScreenBitplanesToTarget(screen, TRUE);
 }
 
-static amiVideo_ULong convertColorToRGBPixel(const amiVideo_OutputColor *color, amiVideo_UByte rshift, amiVideo_UByte gshift, amiVideo_UByte bshift)
+static amiVideo_ULong convertColorToRGBPixel(const amiVideo_OutputColor *color, amiVideo_UByte rshift, amiVideo_UByte gshift, amiVideo_UByte bshift, amiVideo_UByte ashift)
 {
-    return (color->r << rshift) | (color->g << gshift) | (color->b << bshift);
+    return (color->r << rshift) | (color->g << gshift) | (color->b << bshift) | (color->a << ashift);
 }
 
 void amiVideo_convertScreenChunkyPixelsToRGBPixels(amiVideo_Screen *screen)
@@ -274,7 +276,7 @@ void amiVideo_convertScreenChunkyPixelsToRGBPixels(amiVideo_Screen *screen)
 		}
 		
 		/* set new pixel on offset + j */
-		screen->uncorrectedRGBFormat.pixels[offset + j] = convertColorToRGBPixel(&result, screen->uncorrectedRGBFormat.rshift, screen->uncorrectedRGBFormat.gshift, screen->uncorrectedRGBFormat.bshift);
+		screen->uncorrectedRGBFormat.pixels[offset + j] = convertColorToRGBPixel(&result, screen->uncorrectedRGBFormat.rshift, screen->uncorrectedRGBFormat.gshift, screen->uncorrectedRGBFormat.bshift, screen->uncorrectedRGBFormat.ashift);
 		
 		previousResult = result;
 	    }
@@ -289,7 +291,7 @@ void amiVideo_convertScreenChunkyPixelsToRGBPixels(amiVideo_Screen *screen)
 	unsigned int i;
 	
 	for(i = 0; i < screenWidthInPixels * screen->height; i++)
-	    screen->uncorrectedRGBFormat.pixels[i] = convertColorToRGBPixel(&screen->palette.chunkyFormat.color[screen->uncorrectedChunkyFormat.pixels[i]], screen->uncorrectedRGBFormat.rshift, screen->uncorrectedRGBFormat.gshift, screen->uncorrectedRGBFormat.bshift);
+	    screen->uncorrectedRGBFormat.pixels[i] = convertColorToRGBPixel(&screen->palette.chunkyFormat.color[screen->uncorrectedChunkyFormat.pixels[i]], screen->uncorrectedRGBFormat.rshift, screen->uncorrectedRGBFormat.gshift, screen->uncorrectedRGBFormat.bshift, screen->uncorrectedRGBFormat.ashift);
     }
 }
 
@@ -385,12 +387,39 @@ void amiVideo_correctScreenPixels(amiVideo_Screen *screen)
     }
 }
 
+static void reorderPixelBytes(amiVideo_Screen *screen, amiVideo_UByte rshift, amiVideo_UByte gshift, amiVideo_UByte bshift, amiVideo_UByte ashift)
+{
+    unsigned int i;
+    
+    for(i = 0; i < screen->uncorrectedRGBFormat.pitch / 4 * screen->height; i++)
+    {
+        amiVideo_ULong pixel = screen->uncorrectedRGBFormat.pixels[i];
+        amiVideo_OutputColor color;
+        
+        color.r = (pixel >> rshift) & 0xff;
+        color.g = (pixel >> gshift) & 0xff;
+        color.b = (pixel >> bshift) & 0xff;
+        color.a = (pixel >> ashift) & 0xff;
+        
+        convertColorToRGBPixel(&color, screen->uncorrectedRGBFormat.rshift, screen->uncorrectedRGBFormat.gshift, screen->uncorrectedRGBFormat.bshift, screen->uncorrectedRGBFormat.ashift);
+    }
+}
+
 void amiVideo_convertScreenBitplanesToRGBPixels(amiVideo_Screen *screen)
 {
-    if(screen->bitplaneDepth == 24 || screen->bitplaneDepth == 32)
+    if(screen->bitplaneDepth == 24 || screen->bitplaneDepth == 32) /* For true color images we directly convert bitplanes to RGB pixels */
+    {
         convertScreenBitplanesToTarget(screen, FALSE);
+        
+        /* Reorder the bytes if the real display uses a different order */
+        if(screen->bitplaneDepth == 24 && (screen->uncorrectedRGBFormat.ashift != 24 || screen->uncorrectedRGBFormat.rshift != 16 || screen->uncorrectedRGBFormat.gshift != 8 || screen->uncorrectedRGBFormat.bshift != 0))
+            reorderPixelBytes(screen, 16, 8, 0, 24);
+        else if(screen->bitplaneDepth == 32 && (screen->uncorrectedRGBFormat.rshift != 24 || screen->uncorrectedRGBFormat.gshift != 16 || screen->uncorrectedRGBFormat.bshift != 8 || screen->uncorrectedRGBFormat.ashift != 0))
+            reorderPixelBytes(screen, 24, 16, 8, 0);
+    }
     else
     {
+        /* For lower bitplane depths we first have to compose chunky pixels to determine the actual color values */
         amiVideo_convertBitplaneColorsToChunkyFormat(&screen->palette);
         amiVideo_convertScreenBitplanesToChunkyPixels(screen);
         amiVideo_convertScreenChunkyPixelsToRGBPixels(screen);

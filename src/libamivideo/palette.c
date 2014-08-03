@@ -112,6 +112,7 @@ void amiVideo_convertBitplaneColorsToChunkyFormat(amiVideo_Palette *palette)
         targetColor->r = sourceColor->r << shift;
         targetColor->g = sourceColor->g << shift;
         targetColor->b = sourceColor->b << shift;
+        targetColor->a = '\0';
     }
     
     /* For extra half brite screen modes we must append half of the color values of the original color register values */
@@ -128,6 +129,7 @@ void amiVideo_convertBitplaneColorsToChunkyFormat(amiVideo_Palette *palette)
 	    targetColor->r = sourceColor->r >> 1;
 	    targetColor->g = sourceColor->g >> 1;
 	    targetColor->b = sourceColor->b >> 1;
+	    targetColor->a = '\0';
 	}
     }
 }

@@ -54,8 +54,8 @@ typedef struct
     /** Defines the intensity of the blue color channel */
     amiVideo_UByte b;
 
-    /** Used for alignment with SDL_Color and 32-bit architectures */
-    amiVideo_UByte unused; 
+    /** Defines the intensity of the alpha color channel */
+    amiVideo_UByte a;
 }
 amiVideo_OutputColor;
 
