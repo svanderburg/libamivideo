@@ -353,4 +353,6 @@ void amiVideo_convertScreenChunkyPixelsToCorrectedRGBPixels(amiVideo_Screen *scr
  */
 amiVideo_ColorFormat amiVideo_autoSelectColorFormat(const amiVideo_Screen *screen);
 
+void amiVideo_reorderRGBPixels(amiVideo_Screen *screen);
+
 #endif

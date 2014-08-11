@@ -387,35 +387,12 @@ void amiVideo_correctScreenPixels(amiVideo_Screen *screen)
     }
 }
 
-static void reorderPixelBytes(amiVideo_Screen *screen, amiVideo_UByte rshift, amiVideo_UByte gshift, amiVideo_UByte bshift, amiVideo_UByte ashift)
-{
-    unsigned int i;
-    
-    for(i = 0; i < screen->uncorrectedRGBFormat.pitch / 4 * screen->height; i++)
-    {
-        amiVideo_ULong pixel = screen->uncorrectedRGBFormat.pixels[i];
-        amiVideo_OutputColor color;
-        
-        color.r = (pixel >> rshift) & 0xff;
-        color.g = (pixel >> gshift) & 0xff;
-        color.b = (pixel >> bshift) & 0xff;
-        color.a = (pixel >> ashift) & 0xff;
-        
-        convertColorToRGBPixel(&color, screen->uncorrectedRGBFormat.rshift, screen->uncorrectedRGBFormat.gshift, screen->uncorrectedRGBFormat.bshift, screen->uncorrectedRGBFormat.ashift);
-    }
-}
-
 void amiVideo_convertScreenBitplanesToRGBPixels(amiVideo_Screen *screen)
 {
     if(screen->bitplaneDepth == 24 || screen->bitplaneDepth == 32) /* For true color images we directly convert bitplanes to RGB pixels */
     {
         convertScreenBitplanesToTarget(screen, FALSE);
-        
-        /* Reorder the bytes if the real display uses a different order */
-        if(screen->bitplaneDepth == 24 && (screen->uncorrectedRGBFormat.ashift != 24 || screen->uncorrectedRGBFormat.rshift != 16 || screen->uncorrectedRGBFormat.gshift != 8 || screen->uncorrectedRGBFormat.bshift != 0))
-            reorderPixelBytes(screen, 16, 8, 0, 24);
-        else if(screen->bitplaneDepth == 32 && (screen->uncorrectedRGBFormat.rshift != 24 || screen->uncorrectedRGBFormat.gshift != 16 || screen->uncorrectedRGBFormat.bshift != 8 || screen->uncorrectedRGBFormat.ashift != 0))
-            reorderPixelBytes(screen, 24, 16, 8, 0);
+        amiVideo_reorderRGBPixels(screen);
     }
     else
     {
@@ -450,4 +427,31 @@ amiVideo_ColorFormat amiVideo_autoSelectColorFormat(const amiVideo_Screen *scree
         return AMIVIDEO_RGB_FORMAT;
     else
         return AMIVIDEO_CHUNKY_FORMAT;
+}
+
+static void reorderPixelBytes(amiVideo_Screen *screen, amiVideo_UByte rshift, amiVideo_UByte gshift, amiVideo_UByte bshift, amiVideo_UByte ashift)
+{
+    unsigned int i;
+    
+    for(i = 0; i < screen->uncorrectedRGBFormat.pitch / 4 * screen->height; i++)
+    {
+        amiVideo_ULong pixel = screen->uncorrectedRGBFormat.pixels[i];
+        amiVideo_OutputColor color;
+        
+        color.r = (pixel >> rshift) & 0xff;
+        color.g = (pixel >> gshift) & 0xff;
+        color.b = (pixel >> bshift) & 0xff;
+        color.a = (pixel >> ashift) & 0xff;
+        
+        convertColorToRGBPixel(&color, screen->uncorrectedRGBFormat.rshift, screen->uncorrectedRGBFormat.gshift, screen->uncorrectedRGBFormat.bshift, screen->uncorrectedRGBFormat.ashift);
+    }
+}
+
+void amiVideo_reorderRGBPixels(amiVideo_Screen *screen)
+{
+    /* Reorder the bytes if the real display uses a different order */
+    if(screen->bitplaneDepth == 24 && (screen->uncorrectedRGBFormat.ashift != 24 || screen->uncorrectedRGBFormat.rshift != 16 || screen->uncorrectedRGBFormat.gshift != 8 || screen->uncorrectedRGBFormat.bshift != 0))
+        reorderPixelBytes(screen, 16, 8, 0, 24);
+    else if(screen->bitplaneDepth == 32 && (screen->uncorrectedRGBFormat.rshift != 24 || screen->uncorrectedRGBFormat.gshift != 16 || screen->uncorrectedRGBFormat.bshift != 8 || screen->uncorrectedRGBFormat.ashift != 0))
+        reorderPixelBytes(screen, 24, 16, 8, 0);
 }
