@@ -214,7 +214,8 @@ Converting to uncorrected RGB pixels format
 -------------------------------------------
 Chunky graphics output format is memory efficient and suffices for nearly all
 Amiga screen modes, except for the HAM screenmodes which support more than 256
-colors due to a compression technique.
+colors due to a compression technique and 24 and 32 bitplanes modes which are
+used by so-called deep ILBM images.
 
 To convert to RGB in which every 4 bytes refer to a pixel's color value, we can
 do the following:
@@ -447,9 +448,11 @@ of the bitplanes:
 
 Setting the palette colors for OCS/ECS chipsets
 -----------------------------------------------
-There are two ways to set a palette on AmigaOS each one uses a different color
-specification array. The most trivial is the format used by the `LoadRGB4()`
-function. This format can be generated as follows:
+There are two ways to set a palette on AmigaOS. Each option uses a different
+color specification array.
+
+The most trivial is the format used by the `LoadRGB4()` function. This format can
+be generated as follows:
 
     /* Generate the color specification */
     amiVideo_UWord *colorSpecs = amiVideo_generateRGB4ColorSpecs(&conversionScreen);
@@ -503,8 +506,12 @@ them for you.
 
 Auto selecting a suitable color format
 --------------------------------------
+    amiVideo_ColorFormat format;
+    amiVideo_Screen screen;
+    screen.viewportMode = AMIVIDEO_VIDEOPORTMODE_HAM;
+    
     /* Returns AMIVIDEO_RGB_FORMAT */
-    amiVideo_ColorFormat format = amiVideo_autoSelectColorFormat(AMIVIDEO_VIDEOPORTMODE_HAM);
+    format = amiVideo_autoSelectColorFormat(&screen);
 
 The above function invocation auto selects the most memory efficient color format
 for a given viewport mode. In the example, it returns AMIVIDEO_RGB_FORMAT since
