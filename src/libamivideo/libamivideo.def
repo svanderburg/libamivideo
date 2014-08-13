@@ -1,6 +1,6 @@
 LIBRARY    libamivideo
 EXPORTS
-    amiVideo_initPalette                                   @1
+	amiVideo_initPalette                                   @1
 	amiVideo_cleanupPalette                                @2
 	amiVideo_setBitplanePaletteColors                      @3
 	amiVideo_setChunkyPaletteColors                        @4
@@ -37,3 +37,4 @@ EXPORTS
 	amiVideo_autoSelectLowresPixelScaleFactor              @35
 	amiVideo_extractPaletteFlags                           @36
 	amiVideo_autoSelectViewportMode                        @37
+	amiVideo_reorderRGBPixels                              @38
