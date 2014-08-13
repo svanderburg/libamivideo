@@ -353,6 +353,13 @@ void amiVideo_convertScreenChunkyPixelsToCorrectedRGBPixels(amiVideo_Screen *scr
  */
 amiVideo_ColorFormat amiVideo_autoSelectColorFormat(const amiVideo_Screen *screen);
 
+/**
+ * Reorders the RGB pixels from the 0RGB (for 24 bitplanes) or RGBA (for 32
+ * bitplanes) representation to the byte order that is actually used for the
+ * display screen.
+ *
+ * @param screen Screen conversion structure
+ */
 void amiVideo_reorderRGBPixels(amiVideo_Screen *screen);
 
 #endif
