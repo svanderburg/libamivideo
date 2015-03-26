@@ -150,12 +150,18 @@ earlier:
     amiVideo_initScreen(&screen, viewport->width, viewport->height, viewport->bitplaneDepth, 4, viewport->viewportMode);
     
     /* Set the bitplane palette to the viewport's palette */
-    amiVideo_setBitplanePaletteColors(&screen->palette, color, 32);
+    amiVideo_setBitplanePaletteColors(&screen.palette, color, 32);
     
     /* Set the bitplane pointers to the pointers in the viewport */
     amiVideo_setScreenBitplanePointers(&screen, viewport->bitplanes);
 
-After having configured the screen adapter, we can use it to convert the viewport
+As a sidenote: In the above code fragment we use
+`amiVideo_setScreenBitplanePointers()` to link the adapter to a pointer
+interface. If a contiguous block of planar data is used then
+`amiVideo_setScreenBitplanes()` is typically more useful, which automatically
+sets the pointers to the right locations in the given memory block.
+
+After configuring the screen adapter, we can use it to convert the viewport
 to something that can be displayed on modern hardware, with or without correcting
 its aspect ratio. In the next sections, we explain how this can be done.
 
@@ -188,7 +194,7 @@ of the palette are converted from 4 bits to 8 bits:
     amiVideo_convertBitplaneColorsToChunkyFormat(&screen.palette);
     
     /* Set the palette of the target SDL surface */
-    if(SDL_SetPaletteColors(surface->format->palette, (SDL_Color*)screen.palette.chunkyFormat.color, 0, screen.palette.chunkyFormat.numOfColors) == 0)
+    if(SDL_SetPaletteColors(surface->format->palette, (SDL_Color*)screen.palette.chunkyFormat.color, 0, screen.palette.chunkyFormat.numOfColors) != 0)
     {
         fprintf(stderr, "Cannot set palette of the surface!\n");
         return 1;
@@ -277,7 +283,7 @@ surface:
     amiVideo_convertBitplaneColorsToChunkyFormat(&screen.palette);
     
     /* Set the palette of the target SDL surface */
-    if(SDL_SetPaletteColors(surface->format->palette, (SDL_Color*)screen.palette.chunkyFormat.color, 0, screen.palette.chunkyFormat.numOfColors) == 0)
+    if(SDL_SetPaletteColors(surface->format->palette, (SDL_Color*)screen.palette.chunkyFormat.color, 0, screen.palette.chunkyFormat.numOfColors) != 0)
     {
         fprintf(stderr, "Cannot set palette of the surface!\n");
         return 1;
