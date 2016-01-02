@@ -290,7 +290,7 @@ surface:
     }
     
     /* Set the corrected chunky pixels pointer of the conversion struct to the SDL pixel surface */
-    amiVideo_setScreenCorrectedPixelsPointer(&screen, surface->pixels, surface->pitch, 1, TRUE, 0, 0, 0);
+    amiVideo_setScreenCorrectedPixelsPointer(&screen, surface->pixels, surface->pitch, 1, TRUE, 0, 0, 0, 0);
     
     /* Convert the bitplanes to corrected chunky pixels */
     if(SDL_MUSTLOCK(surface) && SDL_LockSurface(surface) != 0)
