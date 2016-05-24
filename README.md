@@ -103,23 +103,25 @@ Acquiring a planar graphics source
 ----------------------------------
 We use the following imaginary struct as example representing an Amiga viewport:
 
-    typedef struct Color
-    {
-        UBYTE r, g, b;
-    }
-    Color;
+```C
+typedef struct Color
+{
+    UBYTE r, g, b;
+}
+Color;
+
+struct
+{
+    ULONG width;
+    ULONG height;
+    UWORD bitplaneDepth;
+    ULONG viewportMode;
     
-    struct
-    {
-        ULONG width;
-        ULONG height;
-        UWORD bitplaneDepth;
-        ULONG viewportMode;
-        
-        Color color[32];
-        UBYTE *bitplanes[6];
-    }
-    viewport;
+    Color color[32];
+    UBYTE *bitplanes[6];
+}
+viewport;
+```
 
 The above struct represents an Amiga viewport having a specific width
 (in pixels), height (in scanlines), a bitplane depth (corresponding to the amount
@@ -137,23 +139,25 @@ In the following code fragment, we configure a screen instance adopting the
 dimensions, display settings, and palette of the example viewport struct shown
 earlier:
 
-    #include <libamivideo/screen.h>
-    
-    /* Initialise screen with screen settings */
-    amiVideo_Screen screen;
-    
-    /*
-     * Create a screen conversion struct instance with the viewport's width,
-     * height, bitplane depth and viewport mode. We use 4-bits per color
-     * component to simulate OCS/ECS display modes.
-     */
-    amiVideo_initScreen(&screen, viewport->width, viewport->height, viewport->bitplaneDepth, 4, viewport->viewportMode);
-    
-    /* Set the bitplane palette to the viewport's palette */
-    amiVideo_setBitplanePaletteColors(&screen.palette, color, 32);
-    
-    /* Set the bitplane pointers to the pointers in the viewport */
-    amiVideo_setScreenBitplanePointers(&screen, viewport->bitplanes);
+```C
+#include <libamivideo/screen.h>
+
+/* Initialise screen with screen settings */
+amiVideo_Screen screen;
+
+/*
+ * Create a screen conversion struct instance with the viewport's width,
+ * height, bitplane depth and viewport mode. We use 4-bits per color
+ * component to simulate OCS/ECS display modes.
+ */
+amiVideo_initScreen(&screen, viewport->width, viewport->height, viewport->bitplaneDepth, 4, viewport->viewportMode);
+
+/* Set the bitplane palette to the viewport's palette */
+amiVideo_setBitplanePaletteColors(&screen.palette, color, 32);
+
+/* Set the bitplane pointers to the pointers in the viewport */
+amiVideo_setScreenBitplanePointers(&screen, viewport->bitplanes);
+```
 
 As a sidenote: In the above code fragment we use
 `amiVideo_setScreenBitplanePointers()` to link the adapter to a pointer
@@ -181,40 +185,42 @@ Converting to uncorrected chunky pixels format
 The simplest output format is uncorrected chunky pixels in which each output
 pixel is a byte referring to an index of the palette. Moreover, color components
 of the palette are converted from 4 bits to 8 bits:
-    
-    #include <SDL.h>
-    
-    /* Create a SDL surface having 8 bits per pixel in which the output is stored */
-    SDL_Surface *surface = SDL_CreateRGBSurface(0, screen.width, screen.height, 8, 0, 0, 0, 0);
-    
-    /*
-     * Convert the colors of the palette from 4 bits per color component to 8
-     * bits per color component.
-     */
-    amiVideo_convertBitplaneColorsToChunkyFormat(&screen.palette);
-    
-    /* Set the palette of the target SDL surface */
-    if(SDL_SetPaletteColors(surface->format->palette, (SDL_Color*)screen.palette.chunkyFormat.color, 0, screen.palette.chunkyFormat.numOfColors) != 0)
-    {
-        fprintf(stderr, "Cannot set palette of the surface!\n");
-        return 1;
-    }
-    
-    /* Sets the uncorrected chunky pixels pointer of the conversion struct to that of the SDL pixel surface */
-    amiVideo_setScreenUncorrectedChunkyPixelsPointer(&screen, surface->pixels, surface->pitch);
-    
-    /* Convert the bitplanes to chunky pixels */
-    
-    if(SDL_MUSTLOCK(surface) && SDL_LockSurface(surface) != 0)
-    {
-        fprintf(stderr, "Cannot lock the surface!\n");
-        return 1;
-    }
-    
-    amiVideo_convertScreenBitplanesToChunkyPixels(&screen);
-    
-    if(SDL_MUSTLOCK(surface))
-        SDL_UnlockSurface(surface);
+
+```C
+#include <SDL.h>
+
+/* Create a SDL surface having 8 bits per pixel in which the output is stored */
+SDL_Surface *surface = SDL_CreateRGBSurface(0, screen.width, screen.height, 8, 0, 0, 0, 0);
+
+/*
+ * Convert the colors of the palette from 4 bits per color component to 8
+ * bits per color component.
+ */
+amiVideo_convertBitplaneColorsToChunkyFormat(&screen.palette);
+
+/* Set the palette of the target SDL surface */
+if(SDL_SetPaletteColors(surface->format->palette, (SDL_Color*)screen.palette.chunkyFormat.color, 0, screen.palette.chunkyFormat.numOfColors) != 0)
+{
+    fprintf(stderr, "Cannot set palette of the surface!\n");
+    return 1;
+}
+
+/* Sets the uncorrected chunky pixels pointer of the conversion struct to that of the SDL pixel surface */
+amiVideo_setScreenUncorrectedChunkyPixelsPointer(&screen, surface->pixels, surface->pitch);
+
+/* Convert the bitplanes to chunky pixels */
+
+if(SDL_MUSTLOCK(surface) && SDL_LockSurface(surface) != 0)
+{
+    fprintf(stderr, "Cannot lock the surface!\n");
+    return 1;
+}
+
+amiVideo_convertScreenBitplanesToChunkyPixels(&screen);
+
+if(SDL_MUSTLOCK(surface))
+    SDL_UnlockSurface(surface);
+```
 
 Converting to uncorrected RGB pixels format
 -------------------------------------------
@@ -226,25 +232,27 @@ used by so-called deep ILBM images.
 To convert to RGB in which every 4 bytes refer to a pixel's color value, we can
 do the following:
 
-    #include <SDL.h>
-    
-    /* Create a SDL surface having 24 bits per pixel in which the output is stored */
-    SDL_Surface *surface = SDL_CreateRGBSurface(0, screen.width, screen.height, 24, 0, 0, 0, 0);
-    
-    /* Set the uncorrected RGB pixels pointer of the conversion struct to that of the SDL pixel surface */
-    amiVideo_setScreenUncorrectedRGBPixelsPointer(&screen, surface->pixels, surface->pitch, TRUE, surface->format->Rshift, surface->format->Gshift, surface->format->Bshift, surface->format->Ashift);
-    
-    /* Convert the bitplanes to RGB pixels */
-    if(SDL_MUSTLOCK(surface) && SDL_LockSurface(surface) != 0)
-    {
-        fprintf(stderr, "Cannot lock the surface!\n");
-        return 1;
-    }
-    
-    amiVideo_convertScreenBitplanesToRGBPixels(&screen);
-    
-    if(SDL_MUSTLOCK(surface))
-        SDL_UnlockSurface(surface);
+```C
+#include <SDL.h>
+
+/* Create a SDL surface having 24 bits per pixel in which the output is stored */
+SDL_Surface *surface = SDL_CreateRGBSurface(0, screen.width, screen.height, 24, 0, 0, 0, 0);
+
+/* Set the uncorrected RGB pixels pointer of the conversion struct to that of the SDL pixel surface */
+amiVideo_setScreenUncorrectedRGBPixelsPointer(&screen, surface->pixels, surface->pitch, TRUE, surface->format->Rshift, surface->format->Gshift, surface->format->Bshift, surface->format->Ashift);
+
+/* Convert the bitplanes to RGB pixels */
+if(SDL_MUSTLOCK(surface) && SDL_LockSurface(surface) != 0)
+{
+    fprintf(stderr, "Cannot lock the surface!\n");
+    return 1;
+}
+
+amiVideo_convertScreenBitplanesToRGBPixels(&screen);
+
+if(SDL_MUSTLOCK(surface))
+    SDL_UnlockSurface(surface);
+```
 
 Converting to corrected chunky pixels format
 --------------------------------------------
@@ -255,100 +263,106 @@ correct, for example by doubling the pixels or scanlines.
 
 The following example code converts a planar screen to a _corrected_ chunky
 surface:
-    
-    #include <SDL.h>
-    
-    SDL_Surface *surface;
-    
-    /*
-     * We set the size of a lowres pixel. A lowres pixel has the same size of
-     * two hires pixels. 2 will typically suffice for most images. To support
-     * super hires displays this value needs to be set to 4. However, this
-     * also results in a much bigger output picture.
-     */
-    unsigned int lowresPixelScaleFactor = 2;
-    amiVideo_setLowresPixelScaleFactor(&screen, lowresPixelScaleFactor);
-    
-    /*
-     * Create a SDL surface having 8 bits per pixel in which the output is stored.
-     * The correctedFormat sub struct provides us the dimensions of the corrected
-     * surface.
-     */
-    surface = SDL_CreateRGBSurface(0, screen.correctedFormat.width, screen.correctedFormat.height, 8, 0, 0, 0, 0);
-    
-    /*
-     * Convert the colors of the palette from 4 bits per color component to 8
-     * bits per color component.
-     */
-    amiVideo_convertBitplaneColorsToChunkyFormat(&screen.palette);
-    
-    /* Set the palette of the target SDL surface */
-    if(SDL_SetPaletteColors(surface->format->palette, (SDL_Color*)screen.palette.chunkyFormat.color, 0, screen.palette.chunkyFormat.numOfColors) != 0)
-    {
-        fprintf(stderr, "Cannot set palette of the surface!\n");
-        return 1;
-    }
-    
-    /* Set the corrected chunky pixels pointer of the conversion struct to the SDL pixel surface */
-    amiVideo_setScreenCorrectedPixelsPointer(&screen, surface->pixels, surface->pitch, 1, TRUE, 0, 0, 0, 0);
-    
-    /* Convert the bitplanes to corrected chunky pixels */
-    if(SDL_MUSTLOCK(surface) && SDL_LockSurface(surface) != 0)
-    {
-        fprintf(stderr, "Cannot lock the surface!\n");
-        return 1;
-    }
-    
-    amiVideo_convertScreenBitplanesToCorrectedChunkyPixels(&screen);
-    
-    if(SDL_MUSTLOCK(surface))
-        SDL_UnlockSurface(surface);
+
+```C
+#include <SDL.h>
+
+SDL_Surface *surface;
+
+/*
+ * We set the size of a lowres pixel. A lowres pixel has the same size of
+ * two hires pixels. 2 will typically suffice for most images. To support
+ * super hires displays this value needs to be set to 4. However, this
+ * also results in a much bigger output picture.
+ */
+unsigned int lowresPixelScaleFactor = 2;
+amiVideo_setLowresPixelScaleFactor(&screen, lowresPixelScaleFactor);
+
+/*
+ * Create a SDL surface having 8 bits per pixel in which the output is stored.
+ * The correctedFormat sub struct provides us the dimensions of the corrected
+ * surface.
+ */
+surface = SDL_CreateRGBSurface(0, screen.correctedFormat.width, screen.correctedFormat.height, 8, 0, 0, 0, 0);
+
+/*
+ * Convert the colors of the palette from 4 bits per color component to 8
+ * bits per color component.
+ */
+amiVideo_convertBitplaneColorsToChunkyFormat(&screen.palette);
+
+/* Set the palette of the target SDL surface */
+if(SDL_SetPaletteColors(surface->format->palette, (SDL_Color*)screen.palette.chunkyFormat.color, 0, screen.palette.chunkyFormat.numOfColors) != 0)
+{
+    fprintf(stderr, "Cannot set palette of the surface!\n");
+    return 1;
+}
+
+/* Set the corrected chunky pixels pointer of the conversion struct to the SDL pixel surface */
+amiVideo_setScreenCorrectedPixelsPointer(&screen, surface->pixels, surface->pitch, 1, TRUE, 0, 0, 0, 0);
+
+/* Convert the bitplanes to corrected chunky pixels */
+if(SDL_MUSTLOCK(surface) && SDL_LockSurface(surface) != 0)
+{
+    fprintf(stderr, "Cannot lock the surface!\n");
+    return 1;
+}
+
+amiVideo_convertScreenBitplanesToCorrectedChunkyPixels(&screen);
+
+if(SDL_MUSTLOCK(surface))
+    SDL_UnlockSurface(surface);
+```
 
 Converting to corrected RGB pixels format
 -----------------------------------------
 The following example code converts a planar screen to a corrected RGB surface:
-    
-    #include <SDL.h>
-    
-    SDL_Surface *surface;
-    
-    /*
-     * We set the size of a lowres pixel. A lowres pixel has the same size of
-     * two hires pixels. 2 will typically suffice for most images. To support
-     * super hires displays this value needs to be set to 4. However, this
-     * also results in a much bigger output picture.
-     */
-    unsigned int lowresPixelScaleFactor = 2;
-    amiVideo_setLowresPixelScaleFactor(&screen, lowresPixelScaleFactor);
-    
-    /*
-     * Create a SDL surface having 24 bits per pixel in which the output is
-     * stored. The correctedFormat sub struct provides us the dimensions of the
-     * corrected surface.
-     */
-    surface = SDL_CreateRGBSurface(0, screen->correctedFormat.width, screen->correctedFormat.height, 24, 0, 0, 0, 0);
-    
-    /* Set the corrected RGB pixels pointer of the conversion struct to the SDL pixel surface */
-    amiVideo_setScreenCorrectedPixelsPointer(&screen, surface->pixels, surface->pitch, 4, TRUE, surface->format->Rshift, surface->format->Gshift, surface->format->Bshift, surface->format->Ashift);
-    
-    /* Convert the bitplanes to corrected RGB pixels */
-    if(SDL_MUSTLOCK(surface) && SDL_LockSurface(surface) != 0)
-    {
-        fprintf(stderr, "Cannot lock the surface!\n");
-        return 1;
-    }
-    
-    amiVideo_convertScreenBitplanesToCorrectedRGBPixels(&screen);
-    
-    if(SDL_MUSTLOCK(surface))
-        SDL_UnlockSurface(surface);
+
+```C
+#include <SDL.h>
+
+SDL_Surface *surface;
+
+/*
+ * We set the size of a lowres pixel. A lowres pixel has the same size of
+ * two hires pixels. 2 will typically suffice for most images. To support
+ * super hires displays this value needs to be set to 4. However, this
+ * also results in a much bigger output picture.
+ */
+unsigned int lowresPixelScaleFactor = 2;
+amiVideo_setLowresPixelScaleFactor(&screen, lowresPixelScaleFactor);
+
+/*
+ * Create a SDL surface having 24 bits per pixel in which the output is
+ * stored. The correctedFormat sub struct provides us the dimensions of the
+ * corrected surface.
+ */
+surface = SDL_CreateRGBSurface(0, screen->correctedFormat.width, screen->correctedFormat.height, 24, 0, 0, 0, 0);
+
+/* Set the corrected RGB pixels pointer of the conversion struct to the SDL pixel surface */
+amiVideo_setScreenCorrectedPixelsPointer(&screen, surface->pixels, surface->pitch, 4, TRUE, surface->format->Rshift, surface->format->Gshift, surface->format->Bshift, surface->format->Ashift);
+
+/* Convert the bitplanes to corrected RGB pixels */
+if(SDL_MUSTLOCK(surface) && SDL_LockSurface(surface) != 0)
+{
+    fprintf(stderr, "Cannot lock the surface!\n");
+    return 1;
+}
+
+amiVideo_convertScreenBitplanesToCorrectedRGBPixels(&screen);
+
+if(SDL_MUSTLOCK(surface))
+    SDL_UnlockSurface(surface);
+```
 
 Cleaning up the screen conversion struct
 ----------------------------------------
 After conversions have been performed, we may remove the converstion struct's
 properties from memory:
 
-    amiVideo_cleanupScreen(&screen);
+```C
+amiVideo_cleanupScreen(&screen);
+```
 
 Converting chunky graphics to planar graphics
 =============================================
@@ -362,20 +376,22 @@ Acquiring a chunky graphics surface
 In the examples used in the following subsections, we use the following
 imaginary struct representing a chunky graphics surface with a palette:
 
-    struct
-    {
-        UBYTE r, g, b, a;
-    }
-    Color;
+```C
+struct
+{
+    UBYTE r, g, b, a;
+}
+Color;
 
-    struct
-    {
-        struct Color *colors;
-        unsigned int numOfColors;
-        int width, height;
-        void *pixels;
-    }
-    chunkyImage;
+struct
+{
+    struct Color *colors;
+    unsigned int numOfColors;
+    int width, height;
+    void *pixels;
+}
+chunkyImage;
+```
 
 The above struct contains a palette with a specific amount of colors, a width
 (in pixels), height (in scanlines) and an array containing bytes representing
@@ -387,20 +403,22 @@ To convert the chunky image surface to a planar graphics surface, we must create
 an instance of the screen conversion struct taking the appropriate values of
 the chunky image:
 
-    /* Create a screen conversion struct */
-    amiVideo_Screen conversionScreen;
-    
-    /*
-     * Initialise a screen conversion struct. Chunky graphics normally have 8 bit
-     * color components and 256 colors.
-     */
-    amiVideo_initScreen(&conversionScreen, chunkyImage.width, chunkyImage.height, 8, 8, 0);
-    
-    /* We must also set the colors of the viewport's chunky palette */
-    amiVideo_setChunkyPaletteColors(&screen->palette, chunkyImage.colors, chunkyImage.numOfColors);
-    
-    /* Sets the uncorrected chunky pixels pointer of the conversion struct to that of the chunky pixel surface */
-    amiVideo_setScreenUncorrectedChunkyPixelsPointer(conversionScreen, (amiVideo_UByte*)chunkyImage.pixels, chunkyImage.width);
+```C
+/* Create a screen conversion struct */
+amiVideo_Screen conversionScreen;
+
+/*
+ * Initialise a screen conversion struct. Chunky graphics normally have 8 bit
+ * color components and 256 colors.
+ */
+amiVideo_initScreen(&conversionScreen, chunkyImage.width, chunkyImage.height, 8, 8, 0);
+
+/* We must also set the colors of the viewport's chunky palette */
+amiVideo_setChunkyPaletteColors(&screen->palette, chunkyImage.colors, chunkyImage.numOfColors);
+
+/* Sets the uncorrected chunky pixels pointer of the conversion struct to that of the chunky pixel surface */
+amiVideo_setScreenUncorrectedChunkyPixelsPointer(conversionScreen, (amiVideo_UByte*)chunkyImage.pixels, chunkyImage.width);
+```
 
 After having configured the screen adapter, we can use it to convert the chunky
 pixel surface to something that can be displayed on Amiga hardware. In the next
@@ -411,46 +429,50 @@ Creating a screen and setting the bitplane pointers
 In this example, we will use the AmigaOS graphics and intuition APIs to create a
 custom intuition screen with the same dimensions and equivalent properties:
 
-    #include <exec/types.h>
-    
-    #include <graphics/gfx.h>
-    #include <intuition/intuition.h>
-    
-    #include <clib/graphics_protos.h>
-    #include <clib/intuition_protos.h>
-    
-    /* Calculate a suitable viewport mode best suitable for displaying the image */
-    ULONG viewportMode = amiVideo_calculateScreenViewportMode(&conversionScreen);
-    
-    /* Create an intuition screen */
-    
-    UWORD pens[] = { ~0 };
-    
-    struct TagItem screenTags[] = {
-        {SA_Width, conversionScreen.width },
-        {SA_Height, conversionScreen.height },
-        {SA_Depth, 8, /* VGA chunky graphics have 256 colors */
-        {SA_Title, "My converted picture"},
-        {SA_Pens, pens},
-        {SA_FullPalette, TRUE},
-        {SA_Type, CUSTOMSCREEN},
-        {SA_DisplayID, viewportMode},
-        {SA_AutoScroll, TRUE},
-        {TAG_DONE, NULL}
-    };
-    
-    struct Screen *screen = OpenScreenTagList(NULL, screenTags);
+```C
+#include <exec/types.h>
 
-    /* Set the bitplane pointers to those of the intuition screen */
-    amiVideo_setScreenBitplanePointers(&conversionScreen, (amiVideo_UByte**)screen->ViewPort.RasInfo->BitMap->Planes);
+#include <graphics/gfx.h>
+#include <intuition/intuition.h>
+
+#include <clib/graphics_protos.h>
+#include <clib/intuition_protos.h>
+
+/* Calculate a suitable viewport mode best suitable for displaying the image */
+ULONG viewportMode = amiVideo_calculateScreenViewportMode(&conversionScreen);
+
+/* Create an intuition screen */
+
+UWORD pens[] = { ~0 };
+
+struct TagItem screenTags[] = {
+    {SA_Width, conversionScreen.width },
+    {SA_Height, conversionScreen.height },
+    {SA_Depth, 8, /* VGA chunky graphics have 256 colors */
+    {SA_Title, "My converted picture"},
+    {SA_Pens, pens},
+    {SA_FullPalette, TRUE},
+    {SA_Type, CUSTOMSCREEN},
+    {SA_DisplayID, viewportMode},
+    {SA_AutoScroll, TRUE},
+    {TAG_DONE, NULL}
+};
+
+struct Screen *screen = OpenScreenTagList(NULL, screenTags);
+
+/* Set the bitplane pointers to those of the intuition screen */
+amiVideo_setScreenBitplanePointers(&conversionScreen, (amiVideo_UByte**)screen->ViewPort.RasInfo->BitMap->Planes);
+```
 
 Converting the palette
 ----------------------
 The following example converts the colors of the chunky palette to the format
 of the bitplanes:
 
-    /* Convert the palette */
-    amiVideo_convertChunkyColorsToBitplaneFormat(&conversionScreen.palette);
+```C
+/* Convert the palette */
+amiVideo_convertChunkyColorsToBitplaneFormat(&conversionScreen.palette);
+```
 
 Setting the palette colors for OCS/ECS chipsets
 -----------------------------------------------
@@ -460,14 +482,16 @@ color specification array.
 The most trivial is the format used by the `LoadRGB4()` function. This format can
 be generated as follows:
 
-    /* Generate the color specification */
-    amiVideo_UWord *colorSpecs = amiVideo_generateRGB4ColorSpecs(&conversionScreen);
-    
-    /* Set the palette using the generated color specification */
-    LoadRGB4(screen->ViewPort, colorSpecs, conversionScreen.palette.bitplaneFormat.numOfColors);
-    
-    /* Remove the color specification from memory, since we don't need it anymore */
-    free(colorSpecs);
+```C
+/* Generate the color specification */
+amiVideo_UWord *colorSpecs = amiVideo_generateRGB4ColorSpecs(&conversionScreen);
+
+/* Set the palette using the generated color specification */
+LoadRGB4(screen->ViewPort, colorSpecs, conversionScreen.palette.bitplaneFormat.numOfColors);
+
+/* Remove the color specification from memory, since we don't need it anymore */
+free(colorSpecs);
+```
 
 The limitation of `LoadRGB4()` is that it can only set color values that have
 4-bit color components, preventing someone to use the more advanced AGA chipset's
@@ -478,14 +502,16 @@ Setting the palette colors for AGA chipsets
 The other format is used by the `LoadRGB32()` function and can be generated as
 follows:
 
-    /* Generate the color specification */
-    amiVideo_ULong *colorSpecs = amiVideo_generateRGB32ColorSpecs(&screen);
-    
-    /* Set the palette using the generated color specification */
-    LoadRGB32(screen->ViewPort, colorSpecs);
-    
-    /* Remove the color specification from memory, since we don't need it anymore */
-    free(colorSpecs);
+```C
+/* Generate the color specification */
+amiVideo_ULong *colorSpecs = amiVideo_generateRGB32ColorSpecs(&screen);
+
+/* Set the palette using the generated color specification */
+LoadRGB32(screen->ViewPort, colorSpecs);
+
+/* Remove the color specification from memory, since we don't need it anymore */
+free(colorSpecs);
+```
 
 The `LoadRGB32()` function can also be used to set colors with 8-bit color
 components.
@@ -494,15 +520,19 @@ Converting chunky pixels to bitplanes
 -------------------------------------
 To convert the chunky pixels to bitplanes, we can do:
 
-    /* Convert chunky pixels to bitplanes */
-    amiVideo_convertScreenChunkyPixelsToBitplanes(&conversionScreen);
+```C
+/* Convert chunky pixels to bitplanes */
+amiVideo_convertScreenChunkyPixelsToBitplanes(&conversionScreen);
+```
 
 Cleaning up the screen conversion struct
 ----------------------------------------
 After performing a conversion, we may remove the converstion struct's properties
 from memory once we don't need them anymore:
 
-    amiVideo_cleanupScreen(&conversionScreen);
+```C
+amiVideo_cleanupScreen(&conversionScreen);
+```
 
 Miscellaneous functions
 =======================
@@ -512,12 +542,14 @@ them for you.
 
 Auto selecting a suitable color format
 --------------------------------------
-    amiVideo_ColorFormat format;
-    amiVideo_Screen screen;
-    screen.viewportMode = AMIVIDEO_VIDEOPORTMODE_HAM;
-    
-    /* Returns AMIVIDEO_RGB_FORMAT */
-    format = amiVideo_autoSelectColorFormat(&screen);
+```C
+amiVideo_ColorFormat format;
+amiVideo_Screen screen;
+screen.viewportMode = AMIVIDEO_VIDEOPORTMODE_HAM;
+
+/* Returns AMIVIDEO_RGB_FORMAT */
+format = amiVideo_autoSelectColorFormat(&screen);
+```
 
 The above function invocation auto selects the most memory efficient color format
 for a given viewport mode. In the example, it returns AMIVIDEO_RGB_FORMAT since
@@ -525,8 +557,10 @@ we have to display more than 256 colors.
 
 Auto selecting a lowres pixel scale factor
 ------------------------------------------
-    /* Returns 4 */
-    amiVideo_autoSelectLowresPixelScaleFactor(AMIVIDEO_VIDEOPORTMODE_SUPERHIRES);
+```C
+/* Returns 4 */
+amiVideo_autoSelectLowresPixelScaleFactor(AMIVIDEO_VIDEOPORTMODE_SUPERHIRES);
+```
 
 This function invocation auto selects the most memory efficient lowres pixel
 scale factor for a given viewport mode. The above example needs 4 bytes for a
@@ -534,8 +568,10 @@ lowres pixel since super hires screens are at least 1280 pixels per scanline.
 
 Auto selecting a viewport mode
 ------------------------------
-    /* Returns AMIVIDEO_VIDEOPORTMODE_SUPERHIRES | AMIVIDEO_VIDEOPORTMODE_LACE */
-    amiVideo_autoSelectViewportMode(1280, 512);
+```C
+/* Returns AMIVIDEO_VIDEOPORTMODE_SUPERHIRES | AMIVIDEO_VIDEOPORTMODE_LACE */
+amiVideo_autoSelectViewportMode(1280, 512);
+```
 
 The above function invocation auto selects the best suitable resolution viewport
 mode bits for a screen with the given dimensions. To properly display an 1280x512
