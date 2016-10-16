@@ -3,6 +3,9 @@
 , buildForAmiga ? false
 , buildForWindows ? false
 , amigaosenvPath ? <amigaosenv>
+, kickstartROMFile ? null
+, baseDiskImage ? null
+, useUAE ? true
 , libamivideo ? {outPath = ./.; rev = 1234;}
 , officialRelease ? false
 }:
@@ -50,8 +53,8 @@ let
       (pkgs.lib.optionalAttrs (buildForAmiga)
         (let
           amigaosenv = import amigaosenvPath {
-            inherit (pkgs) stdenv uae procps;
-            lndir = pkgs.xorg.lndir;
+            inherit (pkgs) stdenv fetchurl lhasa uae fsuae procps bchunk cdrtools;
+            inherit (pkgs.xorg) lndir;
           };
         in
         {
@@ -67,6 +70,7 @@ let
               make check
               make install
             '';
+            inherit kickstartROMFile baseDiskImage useUAE;
           };
         }));
   };
