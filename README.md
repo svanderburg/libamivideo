@@ -116,7 +116,7 @@ struct
     ULONG height;
     UWORD bitplaneDepth;
     ULONG viewportMode;
-    
+
     Color color[32];
     UBYTE *bitplanes[6];
 }
@@ -583,9 +583,11 @@ Installation on Unix-like systems
 Compilation and installation of this library on Unix-like systems is straight
 forward, by using the standard GNU autotools build instructions:
 
-    $ ./configure
-    $ make
-    $ make install
+```bash
+$ ./configure
+$ make
+$ make install
+```
 
 More details about the installation process can be found in the `INSTALL` file
 included in this package.
@@ -598,7 +600,9 @@ to edit and build it.
 
 Alternatively, you can also build it with `MSBuild` from the command-line:
 
-    $ MSBuild libamivideo.sln
+```
+$ MSBuild libamivideo.sln
+```
 
 The output is produced in the `Debug/` directory.
 

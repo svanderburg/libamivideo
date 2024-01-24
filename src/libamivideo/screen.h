@@ -17,19 +17,19 @@ struct amiVideo_Screen
 {
     /** Defines the width of the screen in pixels */
     amiVideo_Word width;
-    
+
     /** Defines the height of the screen in pixels */
     amiVideo_Word height;
-    
+
     /** Defines the bitplane depth */
     unsigned int bitplaneDepth;
-    
+
     /** Contains the viewport mode settings */
     amiVideo_Long viewportMode;
-    
+
     /* Contains the values of the color registers and its converted values */
     amiVideo_Palette palette;
-    
+
     /**
      * Contains all the relevant properties of the current screen to display it
      * in planar format -- the format that Amiga's OCS, ECS and AGA chipsets use.
@@ -49,17 +49,17 @@ struct amiVideo_Screen
      */
     struct
     {
-	/** Contains pointers to each bitplane section that stores parts of each pixel's color component */
-	amiVideo_UByte *bitplanes[AMIVIDEO_MAX_NUM_OF_BITPLANES];
-	
-	/** Contains the padded width in pixels that is rounded up to the nearest word boundary */
-	unsigned int pitch;
-	
-	/** Indicates whether the pixel memory is allocated and needs to be freed */
-	int memoryAllocated;
+        /** Contains pointers to each bitplane section that stores parts of each pixel's color component */
+        amiVideo_UByte *bitplanes[AMIVIDEO_MAX_NUM_OF_BITPLANES];
+
+        /** Contains the padded width in pixels that is rounded up to the nearest word boundary */
+        unsigned int pitch;
+
+        /** Indicates whether the pixel memory is allocated and needs to be freed */
+        int memoryAllocated;
     }
     bitplaneFormat;
-    
+
     /**
      * Contains all the relevant properties of the current screen to display it
      * in chunky format -- used by PC displays with 256 colors. In this format,
@@ -70,18 +70,18 @@ struct amiVideo_Screen
      */
     struct
     {
-	/** Contains the padded screen width in bytes */
-	unsigned int pitch;
-	
-	/** Contains the pixel data in which each byte represents an index in the palette */
-	amiVideo_UByte *pixels;
-	
-	/** Indicates whether the pixel memory is allocated and needs to be freed */
-	int memoryAllocated;
+        /** Contains the padded screen width in bytes */
+        unsigned int pitch;
+
+        /** Contains the pixel data in which each byte represents an index in the palette */
+        amiVideo_UByte *pixels;
+
+        /** Indicates whether the pixel memory is allocated and needs to be freed */
+        int memoryAllocated;
     }
     uncorrectedChunkyFormat;
-    
-    /** 
+
+    /**
      * Contains all the relevant properties of the current screen to display it
      * in RGB format in which every four bytes represent the red, green, blue
      * value of a pixel and a padding byte.
@@ -90,29 +90,29 @@ struct amiVideo_Screen
      */
     struct
     {
-	/** Contains the padded screen width in bytes (usually rounded up to the nearest 4-byte boundary) */
-	unsigned int pitch;
-	
-	/** Contains the amount of bits that we have to left shift the red color component */
-	amiVideo_UByte rshift;
-	
-	/** Contains the amount of bits that we have to left shift the green color component */
-	amiVideo_UByte gshift;
-	
-	/** Contains the amount of bits that we have to left shift the blue color component */
-	amiVideo_UByte bshift;
-	
-	/** Contains the amount of bits that we have to left shift the alpha color component */
-	amiVideo_UByte ashift;
-	
-	/** Contains the pixel data in which each four bytes represent red, glue, blue values and a padding byte */
-	amiVideo_ULong *pixels;
-	
-	/** Indicates whether the pixel memory is allocated and needs to be freed */
-	int memoryAllocated;
+        /** Contains the padded screen width in bytes (usually rounded up to the nearest 4-byte boundary) */
+        unsigned int pitch;
+
+        /** Contains the amount of bits that we have to left shift the red color component */
+        amiVideo_UByte rshift;
+
+        /** Contains the amount of bits that we have to left shift the green color component */
+        amiVideo_UByte gshift;
+
+        /** Contains the amount of bits that we have to left shift the blue color component */
+        amiVideo_UByte bshift;
+
+        /** Contains the amount of bits that we have to left shift the alpha color component */
+        amiVideo_UByte ashift;
+
+        /** Contains the pixel data in which each four bytes represent red, glue, blue values and a padding byte */
+        amiVideo_ULong *pixels;
+
+        /** Indicates whether the pixel memory is allocated and needs to be freed */
+        int memoryAllocated;
     }
     uncorrectedRGBFormat;
-    
+
     /**
      * Contains the screen in a format that has the correct aspect ratio, as
      * Amiga displays have only have a horizontal pixel resolution and interlace
@@ -123,23 +123,23 @@ struct amiVideo_Screen
      */
     struct
     {
-	/** Contains the width of the corrected screen */
-	int width;
-	
-	/** Contains the height of the corrected screen */
-	int height;
-	
-	/** Contains the padded width of the corrected screen (usually rounded up to the nearest 4-byte boundary) */
-	unsigned int pitch;
-	
-	/** Contains the amount of bytes per pixel (1 = chunky, 4 = RGB) */
-	unsigned int bytesPerPixel;
-	
-	/* Specifies the width of a lowres pixel in real pixels. Usually 2 is sufficient. To support super hires displays, 4 is required. */
-	unsigned int lowresPixelScaleFactor;
-	
-	/** Contains the pixel data */
-	void *pixels;
+        /** Contains the width of the corrected screen */
+        int width;
+
+        /** Contains the height of the corrected screen */
+        int height;
+
+        /** Contains the padded width of the corrected screen (usually rounded up to the nearest 4-byte boundary) */
+        unsigned int pitch;
+
+        /** Contains the amount of bytes per pixel (1 = chunky, 4 = RGB) */
+        unsigned int bytesPerPixel;
+
+        /* Specifies the width of a lowres pixel in real pixels. Usually 2 is sufficient. To support super hires displays, 4 is required. */
+        unsigned int lowresPixelScaleFactor;
+
+        /** Contains the pixel data */
+        void *pixels;
     }
     correctedFormat;
 };
@@ -198,6 +198,7 @@ void amiVideo_freeScreen(amiVideo_Screen *screen);
  * @param lowresPixelScaleFactor Specifies the width of a lowres pixel in real pixels. Usually 2 is sufficient. To support super hires displays, 4 is required.
  * @param width Width of the uncorrected surface
  * @param viewportMode The viewport mode value
+ * @return The width taking the aspect ratio into account
  */
 int amiVideo_calculateCorrectedWidth(unsigned int lowresPixelScaleFactor, amiVideo_Long width, amiVideo_Long viewportMode);
 
@@ -207,6 +208,7 @@ int amiVideo_calculateCorrectedWidth(unsigned int lowresPixelScaleFactor, amiVid
  * @param lowresPixelScaleFactor Specifies the width of a lowres pixel in real pixels. Usually 2 is sufficient. To support super hires displays, 4 is required.
  * @param height Height of the uncorrected surface
  * @param viewportMode The viewport mode value
+ * @return The height taking the aspect ratio into account
  */
 int amiVideo_calculateCorrectedHeight(unsigned int lowresPixelScaleFactor, amiVideo_Long height, amiVideo_Long viewportMode);
 

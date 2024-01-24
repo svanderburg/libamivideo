@@ -35,7 +35,7 @@
  * @param viewportMode Amiga viewport register value
  * @return TRUE if Extra-Halfbrite is enabled, else FALSE
  */
-int amiVideo_checkExtraHalfbrite(const amiVideo_Long viewportMode);
+amiVideo_Bool amiVideo_checkExtraHalfbrite(const amiVideo_Long viewportMode);
 
 /**
  * Checks whether the Hold-and-Modify (HAM) bit is enabled in the viewport mode register.
@@ -43,7 +43,7 @@ int amiVideo_checkExtraHalfbrite(const amiVideo_Long viewportMode);
  * @param viewportMode Amiga viewport register value
  * @return TRUE if Extra-Halfbrite is enabled, else FALSE
  */
-int amiVideo_checkHoldAndModify(const amiVideo_Long viewportMode);
+amiVideo_Bool amiVideo_checkHoldAndModify(const amiVideo_Long viewportMode);
 
 /**
  * Checks whether the hires bit is enabled in the viewport mode register.
@@ -51,7 +51,7 @@ int amiVideo_checkHoldAndModify(const amiVideo_Long viewportMode);
  * @param viewportMode Amiga viewport register value
  * @return TRUE if the hires bit is enabled, else FALSE
  */
-int amiVideo_checkHires(const amiVideo_Long viewportMode);
+amiVideo_Bool amiVideo_checkHires(const amiVideo_Long viewportMode);
 
 /**
  * Checks whether the super and hires bits are enabled in the viewport mode
@@ -60,7 +60,7 @@ int amiVideo_checkHires(const amiVideo_Long viewportMode);
  * @param viewportMode Amiga viewport register value
  * @return TRUE if the hires and super bits are enabled, else FALSE
  */
-int amiVideo_checkSuperHires(const amiVideo_Long viewportMode);
+amiVideo_Bool amiVideo_checkSuperHires(const amiVideo_Long viewportMode);
 
 /**
  * Checks whether the hires bit is enabled in the viewport mode register.
@@ -68,7 +68,7 @@ int amiVideo_checkSuperHires(const amiVideo_Long viewportMode);
  * @param viewportMode Amiga viewport register value
  * @return TRUE if the hires bit is enabled, else FALSE
  */
-int amiVideo_checkLaced(const amiVideo_Long viewportMode);
+amiVideo_Bool amiVideo_checkLaced(const amiVideo_Long viewportMode);
 
 /**
  * Auto selects the most space efficient lowres pixel scale factor capable of

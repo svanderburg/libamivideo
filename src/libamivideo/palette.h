@@ -30,10 +30,10 @@ typedef struct
 {
     /** Defines the intensity of the red color channel */
     amiVideo_UByte r;
-    
+
     /** Defines the intensity of the green color channel */
     amiVideo_UByte g;
-    
+
     /** Defines the intensity of the blue color channel */
     amiVideo_UByte b;
 }
@@ -47,10 +47,10 @@ typedef struct
 {
     /** Defines the intensity of the red color channel */
     amiVideo_UByte r;
-    
+
     /** Defines the intensity of the green color channel */
     amiVideo_UByte g;
-    
+
     /** Defines the intensity of the blue color channel */
     amiVideo_UByte b;
 
@@ -63,27 +63,27 @@ typedef struct
 {
     struct
     {
-	/** Contains the viewport mode settings */
-	amiVideo_Long viewportMode;
-        
-	/** Contains the number of colors in the original Amiga palette */
-	unsigned int numOfColors;
-	
-	/** Stores the color values of the palette */
-	amiVideo_Color *color;
-	
-	/** Contains the number of bits that a color component has (4 = OCS/ECS, 8 = AGA) */
-	unsigned int bitsPerColorChannel;
+        /** Contains the viewport mode settings */
+        amiVideo_Long viewportMode;
+
+        /** Contains the number of colors in the original Amiga palette */
+        unsigned int numOfColors;
+
+        /** Stores the color values of the palette */
+        amiVideo_Color *color;
+
+        /** Contains the number of bits that a color component has (4 = OCS/ECS, 8 = AGA) */
+        unsigned int bitsPerColorChannel;
     }
     bitplaneFormat;
-    
+
     struct
     {
-	/** Contains the number of colors in the converted chunky graphics palette */
-	unsigned int numOfColors;
-	
-	/** Stores the color values of the palette */
-	amiVideo_OutputColor *color;
+        /** Contains the number of colors in the converted chunky graphics palette */
+        unsigned int numOfColors;
+
+        /** Stores the color values of the palette */
+        amiVideo_OutputColor *color;
     }
     chunkyFormat;
 }

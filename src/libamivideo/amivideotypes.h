@@ -22,6 +22,9 @@
 #ifndef __AMIVIDEOTYPES_H
 #define __AMIVIDEOTYPES_H
 
+/** An alias representing a boolean */
+typedef int amiVideo_Bool;
+
 /** An unsigned byte */
 typedef unsigned char amiVideo_UByte;
 
